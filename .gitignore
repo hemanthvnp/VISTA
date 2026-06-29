@@ -1,0 +1,95 @@
+# ───────────────────────────────────────────────────────────
+#  V — .gitignore
+# ───────────────────────────────────────────────────────────
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Build output
+client/dist/
+client/build/
+
+# Environment variables — NEVER commit secrets
+.env
+.env.local
+.env.*.local
+server/.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime / temp
+*.pid
+*.seed
+*.pid.lock
+.tmp/
+tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+ml/venv/
+ml/.venv/
+ml/env/
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/
+
+# scikit-learn / ML model artifacts
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Vite
+*.local
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Misc
+.cache/
+.parcel-cache/
+
+# Temporary files
+tmpclaude-*
+nul
+
+# Windows reserved names
+CON
+PRN
+AUX
+NUL
+COM[1-9]
+LPT[1-9]
