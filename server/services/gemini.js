@@ -1,12 +1,24 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+/**
+ * Feature-level LLM functions used by routes.
+ *
+ * These keep the original function names ("gemini.js") for backwards
+ * compatibility, but each call is now routed through llmProvider, which
+ * decides per-feature whether to use Gemini or a local LM Studio model.
+ *
+ * Provider routing is controlled by env vars — see llmProvider.js.
+ */
+
+const { generate, chat, stripJsonFences } = require('./llmProvider');
 
 /**
- * Get typing coaching advice from Gemini based on ML analysis report
+ * Typing coach advice from an ML report.
+ * Feature key: "typingAdvice"
+ *
+ * When routed to LM Studio, a GBNF grammar will be attached in step 2 to
+ * guarantee valid JSON. For now this still works against either provider —
+ * Gemini follows the JSON instruction reliably.
  */
-const getTypingAdvice = async (analysisReport, userState) => {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
+const getTypingAdvice = async (analysisReport, userState, opts = {}) => {
   const prompt = `You are a typing coach analyzing an ML report. Return ONLY valid JSON with no extra text or markdown.
 Report: ${JSON.stringify(analysisReport)}
 User WPM: ${userState.wpm}, Goal: 70+ WPM
@@ -26,45 +38,46 @@ Return exactly this JSON structure:
   "motivation": "1 sentence motivational message"
 }`;
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
-  const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-  return JSON.parse(cleaned);
+  const { text } = await generate({
+    feature: 'typingAdvice',
+    prompt,
+    providerOverride: opts.providerOverride,
+    temperature: 0.6,
+    maxTokens: 1024,
+  });
+  return JSON.parse(stripJsonFences(text));
 };
 
 /**
- * Chat with the AI Tutor using Gemini
+ * Multi-turn AI Tutor chat.
+ * Feature key: "tutor"
  */
-const chatWithTutor = async (messages, userState) => {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
+const chatWithTutor = async (messages, userState, opts = {}) => {
   const systemPrompt = `You are the AI Tutor inside V — a personal learning app for developers.
 Student's active technology: ${userState.activeTech}
 Current total study hours: ${userState.totalHours}
 XP Level: ${userState.level} (${userState.rank})
 Rules: Connect answers to their learning context. Be specific and practical. Use code examples when relevant. Keep responses under 400 words. Format with markdown for readability.`;
 
-  const history = messages.slice(0, -1).map(m => ({
-    role: m.role === 'user' ? 'user' : 'model',
-    parts: [{ text: m.content }],
-  }));
-
-  const chat = model.startChat({
-    history,
-    systemInstruction: { parts: [{ text: systemPrompt }] },
+  const { text } = await chat({
+    feature: 'tutor',
+    systemPrompt,
+    messages,
+    providerOverride: opts.providerOverride,
+    temperature: 0.7,
+    maxTokens: 1024,
   });
-  const result = await chat.sendMessage(messages.at(-1).content);
-  return result.response.text();
+  return text;
 };
 
 /**
- * Review a student's Python challenge solution using Gemini
+ * Python code review.
+ * Feature key: "codeReview"
+ *
+ * Accepts an optional `providerOverride` so the client can pick
+ * "Quick review (local)" vs "Deep review (Gemini)" at request time.
  */
-const reviewPythonCode = async (code, challengeTitle, instructions) => {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
+const reviewPythonCode = async (code, challengeTitle, instructions, opts = {}) => {
   const prompt = `You are a friendly Python tutor reviewing a student's challenge solution inside a coding learning app.
 
 Challenge: "${challengeTitle}"
@@ -82,17 +95,23 @@ Give a concise, encouraging review in 3–5 sentences covering:
 
 Keep it conversational, supportive, and practical. Do NOT use markdown headers. Plain text only.`;
 
-  const result = await model.generateContent(prompt);
-  return result.response.text().trim();
+  const { text } = await generate({
+    feature: 'codeReview',
+    prompt,
+    providerOverride: opts.providerOverride,
+    // For LM Studio path we'll prefer the coder model
+    model: opts.model,
+    temperature: 0.5,
+    maxTokens: 512,
+  });
+  return text.trim();
 };
 
 /**
- * Generate flashcards for a given technology using Gemini
+ * Flashcard generator.
+ * Feature key: "flashcards"
  */
-const generateFlashcards = async (techId) => {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
+const generateFlashcards = async (techId, opts = {}) => {
   const prompt = `You are a flashcard generator for a developer learning app. Generate exactly 10 flashcards for the technology: "${techId}".
 
 Return ONLY valid JSON with no extra text or markdown. Return exactly this JSON structure:
@@ -111,10 +130,14 @@ Rules:
 - Cover different subtopics within the technology
 - Do NOT repeat common beginner questions — aim for useful, interview-level content`;
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
-  const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-  return JSON.parse(cleaned);
+  const { text } = await generate({
+    feature: 'flashcards',
+    prompt,
+    providerOverride: opts.providerOverride,
+    temperature: 0.8,
+    maxTokens: 2048,
+  });
+  return JSON.parse(stripJsonFences(text));
 };
 
 module.exports = { getTypingAdvice, chatWithTutor, reviewPythonCode, generateFlashcards };
