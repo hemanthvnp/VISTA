@@ -12,6 +12,9 @@ import StatCard from '../components/dashboard/StatCard';
 import StudyChart from '../components/dashboard/StudyChart';
 import NextStepCard from '../components/dashboard/NextStepCard';
 import { Clock, Keyboard, TrendingUp, Activity, Trophy } from 'lucide-react';
+import AutoPilotDashboard from '../components/autopilot/AutoPilotDashboard';
+import useAutoPilotStore from '../store/useAutoPilotStore';
+import useAutoPilot from '../hooks/useAutoPilot';
 
 /** Build a 14-day daily WPM/session array from raw sessions */
 function buildDailyStats(sessions) {
@@ -39,6 +42,8 @@ function buildDailyStats(sessions) {
 export default function Dashboard() {
   const user = useAuthStore((s) => s.user);
   const { activeTech } = useAppStore();
+  const autoPilotEnabled = useAutoPilotStore((s) => s.enabled);
+  useAutoPilot(); // initializes AutoPilot data fetch on mount
   const [stats, setStats] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [progress, setProgress] = useState(null);
@@ -165,18 +170,22 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Chart + Next Step */}
-      <div className="grid lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <BrutalCard>
-            <h3 className="text-sm font-heading text-text-secondary mb-3">
-              Study Activity — last 14 days <span className="text-text-muted font-normal text-xs">(minutes)</span>
-            </h3>
-            <StudyChart data={dailyStats} />
-          </BrutalCard>
+      {/* AutoPilot Queue or Chart + Next Step */}
+      {autoPilotEnabled ? (
+        <AutoPilotDashboard />
+      ) : (
+        <div className="grid lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2">
+            <BrutalCard>
+              <h3 className="text-sm font-heading text-text-secondary mb-3">
+                Study Activity — last 14 days <span className="text-text-muted font-normal text-xs">(minutes)</span>
+              </h3>
+              <StudyChart data={dailyStats} />
+            </BrutalCard>
+          </div>
+          <NextStepCard action={nextAction} tech={activeTechObj?.name} />
         </div>
-        <NextStepCard action={nextAction} tech={activeTechObj?.name} />
-      </div>
+      )}
 
       {/* Recent Achievements */}
       <div>

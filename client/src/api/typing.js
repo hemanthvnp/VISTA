@@ -1,4 +1,4 @@
-/** @fileoverview API service for typing and ML analysis endpoints */
+/** @fileoverview API service for typing session tracking (used by the daily Gate) */
 
 const getHeaders = () => {
   const token = localStorage.getItem('vanta_token');
@@ -32,26 +32,5 @@ export const getSessions = async (limit = 50) => {
 
 export const getStats = async () => {
   const res = await fetch('/api/typing/stats', { headers: getHeaders() });
-  return handleResponse(res);
-};
-
-export const runAnalysis = async () => {
-  const res = await fetch('/api/ml/analyze', {
-    method: 'POST',
-    headers: getHeaders(),
-  });
-  return handleResponse(res);
-};
-
-export const getReport = async () => {
-  const res = await fetch('/api/ml/report', { headers: getHeaders() });
-  return handleResponse(res);
-};
-
-export const getGeminiOverview = async () => {
-  const res = await fetch('/api/ml/gemini-overview', {
-    method: 'POST',
-    headers: getHeaders(),
-  });
   return handleResponse(res);
 };

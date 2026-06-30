@@ -5,14 +5,13 @@ import useAuthStore from '../../store/useAuthStore';
 import useAppStore from '../../store/useAppStore';
 import { getRankFromXP, RANK_EMOJIS, getLevelFromXP } from '../../utils/xpCalc';
 import {
-  LayoutDashboard, Keyboard, Map, BookOpen, Code2, Brain,
+  LayoutDashboard, Map, BookOpen, Code2, Brain,
   MessageSquare, Calendar, StickyNote, Hammer, Trophy, Settings,
   ChevronLeft, ChevronRight, Zap, GraduationCap,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/typing', label: 'Typing', icon: Keyboard },
   { path: '/roadmap', label: 'Roadmap', icon: Map },
   { path: '/resources', label: 'Resources', icon: BookOpen },
   { path: '/learn', label: 'Learn', icon: GraduationCap },

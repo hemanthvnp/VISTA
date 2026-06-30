@@ -7,6 +7,7 @@ import XPBadge from '../ui/XPBadge';
 import StreakBadge from '../ui/StreakBadge';
 import Timer from '../ui/Timer';
 import { LogOut, User, ChevronDown } from 'lucide-react';
+import AutoPilotToggle from '../autopilot/AutoPilotToggle';
 
 export default function TopBar() {
   const user = useAuthStore((s) => s.user);
@@ -47,8 +48,9 @@ export default function TopBar() {
         {user && <XPBadge xp={user.xp || 0} />}
       </div>
 
-      {/* Right side: streak + user menu */}
+      {/* Right side: AutoPilot + streak + user menu */}
       <div className="flex items-center gap-4">
+        <AutoPilotToggle compact />
         {user && <StreakBadge count={user.streak?.count || 0} type={user.streak?.type} compact />}
 
         {/* User dropdown */}

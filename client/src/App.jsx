@@ -14,7 +14,6 @@ import OnboardingFlow from './components/layout/OnboardingFlow';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-import Typing from './pages/Typing';
 import Roadmap from './pages/Roadmap';
 import Resources from './pages/Resources';
 import CodePlayground from './pages/CodePlayground';
@@ -124,7 +123,6 @@ export default function App() {
         <Route path="/register" element={<Register />} />
 
         <Route path="/" element={<ProtectedRoute><PageWrapper><Dashboard /></PageWrapper></ProtectedRoute>} />
-        <Route path="/typing" element={<ProtectedRoute><PageWrapper><Typing /></PageWrapper></ProtectedRoute>} />
         <Route path="/roadmap" element={<ProtectedRoute><PageWrapper><Roadmap /></PageWrapper></ProtectedRoute>} />
         <Route path="/resources" element={<ProtectedRoute><PageWrapper><Resources /></PageWrapper></ProtectedRoute>} />
         <Route path="/learn" element={<ProtectedRoute><PageWrapper><LearnHub /></PageWrapper></ProtectedRoute>} />

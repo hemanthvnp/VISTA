@@ -1,7 +1,6 @@
-/** @fileoverview Gemini API hook - wraps backend calls for tutor and typing advice */
+/** @fileoverview Gemini API hook - wraps backend calls for AI tutor chat */
 import { useState } from 'react';
 import { sendTutorMessage as apiSendMessage } from '../api/learning';
-import { getGeminiOverview as apiGetOverview } from '../api/typing';
 
 const useGemini = () => {
   const [loading, setLoading] = useState(false);
@@ -21,21 +20,7 @@ const useGemini = () => {
     }
   };
 
-  const getTypingOverview = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await apiGetOverview();
-      return data;
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { sendTutorMessage, getTypingOverview, loading, error };
+  return { sendTutorMessage, loading, error };
 };
 
 export default useGemini;

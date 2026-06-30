@@ -1,6 +1,9 @@
 const router = require('express').Router();
 const TypingSession = require('../models/TypingSession');
 const auth = require('../middleware/auth');
+const { trackActivity } = require('../utils/activityTracker');
+const CoachingService = require('../services/CoachingService');
+const UserModelService = require('../services/UserModelService');
 
 router.post('/session', auth, async (req, res) => {
   try {
@@ -9,6 +12,13 @@ router.post('/session', auth, async (req, res) => {
       ...req.body,
     });
     res.status(201).json(session);
+    // Fire-and-forget: update user model then run coaching evaluation
+    trackActivity('typing_session', req.body, req.user.userId).then(async () => {
+      try {
+        const model = await UserModelService.getOrCreate(req.user.userId);
+        if (model.autopilotEnabled) await CoachingService.evaluateUser(model);
+      } catch (e) { /* non-fatal */ }
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

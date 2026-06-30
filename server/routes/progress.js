@@ -2,6 +2,9 @@ const router = require('express').Router();
 const Progress = require('../models/Progress');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const { trackActivity } = require('../utils/activityTracker');
+const CoachingService = require('../services/CoachingService');
+const UserModelService = require('../services/UserModelService');
 
 const XP_THRESHOLDS = [0, 500, 1500, 3500, 7000, 12000, 20000, 35000];
 const RANKS = [
@@ -72,6 +75,20 @@ router.put('/', auth, async (req, res) => {
 
     await progress.save();
     res.json(progress);
+
+    // Fire-and-forget: track each completed lesson topic, then run coaching evaluation
+    if (req.body.lessonProgress) {
+      const topics = Object.entries(req.body.lessonProgress);
+      Promise.all(topics.map(([topicId, val]) => {
+        const score = typeof val === 'object' ? (val.score || 100) : 100;
+        return trackActivity('lesson_complete', { topicId, score }, req.user.userId);
+      })).then(async () => {
+        try {
+          const model = await UserModelService.getOrCreate(req.user.userId);
+          if (model.autopilotEnabled) await CoachingService.evaluateUser(model);
+        } catch (e) { /* non-fatal */ }
+      });
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

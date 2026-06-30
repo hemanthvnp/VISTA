@@ -1,7 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const cron = require('node-cron');
 const connectDB = require('./config/db');
+const CoachingService = require('./services/CoachingService');
 
 const app = express();
 
@@ -15,10 +17,12 @@ app.use('/api/typing', require('./routes/typing'));
 app.use('/api/progress', require('./routes/progress'));
 app.use('/api/learning', require('./routes/learning'));
 app.use('/api/tutor', require('./routes/tutor'));
-app.use('/api/ml', require('./routes/ml'));
 app.use('/api/snippets', require('./routes/snippets'));
 app.use('/api/achievements', require('./routes/achievements'));
 app.use('/api/python', require('./routes/python'));
+app.use('/api/autopilot', require('./routes/autopilot'));
+app.use('/api/projects', require('./routes/projects'));
+app.use('/api/medium', require('./routes/medium'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -27,8 +31,19 @@ app.get('/api/health', (req, res) => {
 
 const PORT = process.env.PORT || 5001;
 
+if (!process.env.ENCRYPTION_KEY) {
+  console.warn('[Startup] ENCRYPTION_KEY is not set — Medium account connections will fail to save until it is configured in server/.env.');
+}
+
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`V server running on port ${PORT}`);
+  });
+
+  // Daily coaching check at 08:00 server time
+  cron.schedule('0 8 * * *', () => {
+    CoachingService.evaluateAll().catch(err =>
+      console.error('[Cron] Daily coaching job failed:', err.message)
+    );
   });
 });

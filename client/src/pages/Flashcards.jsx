@@ -8,6 +8,9 @@ import CardControls from '../components/flashcards/CardControls';
 import TechFilter from '../components/resources/TechFilter';
 import BrutalCard from '../components/ui/BrutalCard';
 import { Layers, Shuffle, RotateCcw, Sparkles } from 'lucide-react';
+import useAutoPilotStore from '../store/useAutoPilotStore';
+import AutoPilotBadge from '../components/autopilot/AutoPilotBadge';
+import { getAutoPilotFlashcards } from '../api/autopilot';
 
 function shuffleArray(arr) {
   const a = [...arr];
@@ -26,6 +29,10 @@ export default function Flashcards() {
   const [stats, setStats] = useState({ reviewed: 0, gotIt: 0, learning: 0, hard: 0 });
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const autoPilotEnabled = useAutoPilotStore((s) => s.enabled);
+  const nextActions = useAutoPilotStore((s) => s.nextActions);
+  const [autoPilotDeck, setAutoPilotDeck] = useState(false);
+  const [autoPilotOverride, setAutoPilotOverride] = useState(false);
 
   const loadCards = useCallback(async (tech) => {
     setLoading(true);
@@ -46,6 +53,22 @@ export default function Flashcards() {
   useEffect(() => {
     loadCards(techFilter);
   }, [techFilter, loadCards]);
+
+  const flashcardAction = nextActions.find((a) => a.type === 'flashcard-review');
+
+  useEffect(() => {
+    if (!autoPilotEnabled || !flashcardAction || autoPilotOverride) return;
+    const topicId = flashcardAction.payload?.topicId || techFilter;
+    getAutoPilotFlashcards(topicId)
+      .then(({ flashcards }) => {
+        if (flashcards?.length > 0) {
+          setCards(shuffleArray(flashcards));
+          setCurrentIdx(0);
+          setAutoPilotDeck(true);
+        }
+      })
+      .catch(() => {});
+  }, [autoPilotEnabled, flashcardAction?.id, autoPilotOverride]);
 
   const handleResponse = async (response) => {
     const card = cards[currentIdx];
@@ -100,8 +123,15 @@ export default function Flashcards() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-heading text-text-primary flex items-center gap-2">
           <Layers className="text-brutal-mint" size={22} /> Flashcards
+          {autoPilotDeck && !autoPilotOverride && <AutoPilotBadge />}
         </h1>
         <div className="flex items-center gap-3">
+          {autoPilotDeck && !autoPilotOverride && (
+            <button onClick={() => { setAutoPilotOverride(true); setAutoPilotDeck(false); loadCards(techFilter); }}
+              className="text-xs text-text-muted hover:text-text-secondary underline">
+              Choose my own
+            </button>
+          )}
           <button
             onClick={handleGenerate}
             disabled={generating}

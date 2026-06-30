@@ -4,6 +4,24 @@ const ScheduleWeek = require('../models/ScheduleWeek');
 const Note = require('../models/Note');
 const auth = require('../middleware/auth');
 const { generateFlashcards } = require('../services/gemini');
+const { trackActivity } = require('../utils/activityTracker');
+const CoachingService = require('../services/CoachingService');
+const UserModelService = require('../services/UserModelService');
+const NoteQualityService = require('../services/NoteQualityService');
+const MediumConnection = require('../models/MediumConnection');
+const MediumService = require('../services/MediumService');
+const { decrypt } = require('../utils/encryption');
+
+const PUBLISH_THRESHOLD = 70;
+
+function deriveTitle(content, techId) {
+  const firstLine = (content || '').split('\n').find((l) => l.trim());
+  if (firstLine) {
+    const cleaned = firstLine.replace(/^#+\s*/, '').trim().slice(0, 100);
+    if (cleaned) return cleaned;
+  }
+  return `${techId} Notes`;
+}
 
 // Flashcards are served from the seed data stored in MongoDB 'flashcards' collection
 const mongoose = require('mongoose');
@@ -55,6 +73,19 @@ router.put('/flashcards/:cardId/progress', auth, async (req, res) => {
       { new: true, upsert: true }
     );
     res.json(progress);
+    // Fire-and-forget: track flashcard review, then run coaching evaluation
+    if (req.body.correct !== undefined || req.body.total !== undefined) {
+      trackActivity('flashcard_review', {
+        correct: req.body.correct || 0,
+        total: req.body.total || 1,
+        cardsDue: req.body.cardsDue || 0,
+      }, req.user.userId).then(async () => {
+        try {
+          const model = await UserModelService.getOrCreate(req.user.userId);
+          if (model.autopilotEnabled) await CoachingService.evaluateUser(model);
+        } catch (e) { /* non-fatal */ }
+      });
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -133,13 +164,98 @@ router.put('/notes/:techId', auth, async (req, res) => {
   try {
     const { content } = req.body;
     const wordCount = content ? content.trim().split(/\s+/).filter(Boolean).length : 0;
+
+    const existing = await Note.findOne({ userId: req.user.userId, techId: req.params.techId });
+    const contentChanged = existing ? existing.content !== content : true;
+
+    const update = { content, wordCount, lastEdited: new Date() };
+    if (contentChanged) {
+      update.qualityScore = null;
+      update.qualityFeedback = null;
+      update.qualityCheckedAt = null;
+      update.scoredContentHash = null;
+    }
+
     const note = await Note.findOneAndUpdate(
       { userId: req.user.userId, techId: req.params.techId },
-      { content, wordCount, lastEdited: new Date() },
+      update,
       { new: true, upsert: true }
     );
     res.json(note);
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/notes/:techId/quality-check', auth, async (req, res) => {
+  try {
+    const note = await Note.findOne({ userId: req.user.userId, techId: req.params.techId });
+    if (!note || !note.content?.trim()) {
+      return res.status(422).json({ type: 'validation', message: 'Write some notes before requesting a quality check.' });
+    }
+
+    const currentHash = NoteQualityService.hashContent(note.content);
+    if (note.scoredContentHash === currentHash && note.qualityScore !== null && note.qualityScore !== undefined) {
+      return res.json(note);
+    }
+
+    const result = await NoteQualityService.checkQuality(note.content);
+    if (result.error) {
+      return res.status(502).json({ type: 'llm_error', message: 'Could not complete the quality check. Please try again.' });
+    }
+
+    note.qualityScore = result.score;
+    note.qualityFeedback = result.feedback;
+    note.qualityCheckedAt = new Date();
+    note.scoredContentHash = currentHash;
+    await note.save();
+
+    res.json(note);
+  } catch (error) {
+    console.error('Note quality check error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/notes/:techId/publish', auth, async (req, res) => {
+  try {
+    const note = await Note.findOne({ userId: req.user.userId, techId: req.params.techId });
+    if (!note) return res.status(404).json({ message: 'Note not found.' });
+
+    const currentHash = NoteQualityService.hashContent(note.content);
+    const scoreIsCurrent = note.scoredContentHash === currentHash;
+    if (!scoreIsCurrent || note.qualityScore === null || note.qualityScore === undefined || note.qualityScore < PUBLISH_THRESHOLD) {
+      return res.status(422).json({
+        type: 'validation',
+        message: `This note needs a current quality score of ${PUBLISH_THRESHOLD} or higher before it can be published. Run a Check Quality first.`,
+      });
+    }
+
+    const connection = await MediumConnection.findOne({ userId: req.user.userId });
+    if (!connection) {
+      return res.status(422).json({ type: 'validation', message: 'Connect your Medium account before publishing.' });
+    }
+
+    const token = decrypt(connection.encryptedToken);
+    const title = deriveTitle(note.content, req.params.techId);
+    const publishResult = await MediumService.publishPost({
+      token,
+      authorId: connection.authorId,
+      title,
+      content: note.content,
+    });
+
+    if (!publishResult.ok) {
+      return res.status(502).json({ type: 'medium_api', message: publishResult.message });
+    }
+
+    note.mediumPostUrl = publishResult.url;
+    note.publishedAt = publishResult.publishedAt;
+    await note.save();
+
+    res.json(note);
+  } catch (error) {
+    console.error('Note publish error:', error);
     res.status(500).json({ message: error.message });
   }
 });

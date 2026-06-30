@@ -149,20 +149,6 @@ export const TECHNOLOGIES = [
   },
 ];
 
-/** Mini projects - one per technology */
-export const MINI_PROJECTS = [
-  { techId: 'python', name: 'CLI Task Manager', description: 'Build a command-line task manager with file persistence', subtasks: ['Parse CLI arguments', 'Implement add/remove/list commands', 'Save tasks to JSON file', 'Add due date filtering'] },
-  { techId: 'cpp', name: 'Memory Pool Allocator', description: 'Implement a simple memory pool for fixed-size allocations', subtasks: ['Design pool data structure', 'Implement allocate/deallocate', 'Add pool statistics tracking', 'Write unit tests', 'Benchmark vs new/delete'] },
-  { techId: 'ue5', name: 'Third Person Character', description: 'Create a third-person character with basic movement', subtasks: ['Set up ACharacter class', 'Configure Enhanced Input', 'Add camera arm and movement', 'Implement jump and sprint', 'Add basic animations'] },
-  { techId: 'blender', name: 'Low-Poly Character', description: 'Model and rig a simple low-poly game character', subtasks: ['Block out body shape', 'Add details and UV unwrap', 'Create armature and rig', 'Weight paint all parts', 'Export as FBX'] },
-  { techId: 'git', name: 'Collaborative Workflow', description: 'Practice a full git workflow with branches and merges', subtasks: ['Create feature branches', 'Simulate and resolve merge conflicts', 'Practice interactive rebase'] },
-  { techId: 'pytorch', name: 'MNIST Classifier', description: 'Build a CNN that classifies handwritten digits', subtasks: ['Load and explore MNIST dataset', 'Build CNN architecture', 'Train with Adam optimizer', 'Evaluate accuracy on test set', 'Save trained model'] },
-  { techId: 'rl-ppo', name: 'CartPole Agent', description: 'Train a PPO agent to balance a CartPole', subtasks: ['Set up Gym environment', 'Implement actor-critic network', 'Code PPO training loop', 'Train to 500 reward', 'Plot learning curves'] },
-  { techId: 'zeromq', name: 'Chat System', description: 'Build a multi-client chat using PUB-SUB pattern', subtasks: ['Set up PUB-SUB sockets', 'Implement message broadcasting', 'Add JSON message format', 'Handle disconnections'] },
-  { techId: 'fastapi', name: 'REST API', description: 'Build a CRUD API for a notes application', subtasks: ['Define Pydantic models', 'Implement CRUD endpoints', 'Add input validation', 'Add authentication middleware', 'Write API documentation'] },
-  { techId: 'federated-learning', name: 'FedAvg Simulation', description: 'Simulate federated averaging across virtual clients', subtasks: ['Create synthetic non-IID datasets', 'Implement local training', 'Code FedAvg aggregation', 'Track convergence metrics', 'Compare IID vs non-IID'] },
-];
-
 /** Typing lesson curriculum - 8 levels */
 export const TYPING_LEVELS = [
   {

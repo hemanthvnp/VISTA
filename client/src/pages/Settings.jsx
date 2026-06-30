@@ -6,8 +6,9 @@ import useAppStore from '../store/useAppStore';
 import { updateProfile, changePassword, deleteAccount } from '../api/auth';
 import BrutalCard from '../components/ui/BrutalCard';
 import { TECHNOLOGIES } from '../utils/typingGeminiPrompt';
-import { User, Settings as SettingsIcon, Shield, Info, Bell, Trash2, Sun, Moon, Monitor } from 'lucide-react';
+import { User, Settings as SettingsIcon, Shield, Info, Bell, Trash2, Sun, Moon, Monitor, Zap } from 'lucide-react';
 import useTheme from '../hooks/useTheme';
+import AutoPilotToggle from '../components/autopilot/AutoPilotToggle';
 
 export default function Settings() {
   const user = useAuthStore((s) => s.user);
@@ -107,6 +108,13 @@ export default function Settings() {
           className="mt-4 px-4 py-2 bg-brutal-purple text-white rounded-lg text-sm font-semibold border-2 border-brutal-black shadow-brutal-sm hover:bg-brutal-purple/90 transition-colors">
           {saved ? 'Saved!' : 'Save Changes'}
         </button>
+      </BrutalCard>
+
+      {/* AutoPilot */}
+      <BrutalCard>
+        <h3 className="text-sm text-text-secondary mb-3 flex items-center gap-2"><Zap size={16} className="text-brutal-mint" /> AutoPilot Mode</h3>
+        <p className="text-xs text-text-muted mb-3">When enabled, V drives your learning — adaptive drills, AI-generated content, and proactive coaching.</p>
+        <AutoPilotToggle />
       </BrutalCard>
 
       {/* Theme */}

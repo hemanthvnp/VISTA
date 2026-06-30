@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { getProgress } from '../api/progress';
 import { ALL_TECHS, LAYER_COLORS } from '../utils/learnCurriculum';
 import { CheckCircle, Lock, ChevronRight, Zap, BookOpen } from 'lucide-react';
+import useAutoPilotStore from '../store/useAutoPilotStore';
+import AutoPilotBadge from '../components/autopilot/AutoPilotBadge';
 
 function CompletionRing({ pct = 0, color = '#88D8B0', size = 44 }) {
     const r = (size - 6) / 2;
@@ -30,6 +32,9 @@ const BORDER_CLASSES = {
 export default function LearnHub() {
     const navigate = useNavigate();
     const [completed, setCompleted] = useState({});
+    const autoPilotEnabled = useAutoPilotStore((s) => s.enabled);
+    const nextActions = useAutoPilotStore((s) => s.nextActions);
+    const lessonAction = nextActions.find((a) => a.type === 'lesson');
 
     useEffect(() => {
         getProgress().then(p => setCompleted(p?.lessonProgress || {})).catch(() => { });
@@ -50,6 +55,20 @@ export default function LearnHub() {
 
     return (
         <div className="space-y-6">
+            {/* AutoPilot recommended lesson */}
+            {autoPilotEnabled && lessonAction && (
+                <div className="flex items-center gap-3 p-4 rounded-lg border-2 border-brutal-mint bg-brutal-mint/10">
+                    <AutoPilotBadge />
+                    <p className="text-sm text-text-primary flex-1">{lessonAction.reason}</p>
+                    <button
+                        onClick={() => navigate(lessonAction.payload?.route || '/learn')}
+                        className="px-3 py-1.5 rounded-lg border-2 border-brutal-black bg-brutal-black text-white text-xs font-bold shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all flex-shrink-0"
+                    >
+                        Go
+                    </button>
+                </div>
+            )}
+
             {/* Header */}
             <div className="flex items-start justify-between">
                 <div>

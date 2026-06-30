@@ -29,6 +29,7 @@ const FEATURE_ENV_KEYS = {
   typingAdvice: 'LLM_PROVIDER_TYPING_ADVICE',
   flashcards: 'LLM_PROVIDER_FLASHCARDS',
   codeReview: 'LLM_PROVIDER_CODE_REVIEW',
+  noteQuality: 'LLM_PROVIDER_NOTE_QUALITY',
 };
 
 function resolveProvider(feature) {

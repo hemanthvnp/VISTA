@@ -82,6 +82,10 @@ coverage/
 .cache/
 .parcel-cache/
 
+# Claude Code local runtime state (commands/skills are tracked, this isn't)
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+
 # Temporary files
 tmpclaude-*
 nul
