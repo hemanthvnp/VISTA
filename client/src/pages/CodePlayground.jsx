@@ -1,4 +1,4 @@
-/** @fileoverview Code Playground - Monaco editor with Python (Pyodide) and JS execution */
+/** @fileoverview Code Playground — Monaco editor with hybrid execution (Pyodide + native JS/TS + Piston). */
 import { useState, useCallback } from 'react';
 import usePyodide from '../hooks/usePyodide';
 import useGemini from '../hooks/useGemini';
@@ -7,17 +7,13 @@ import EditorPanel from '../components/code/EditorPanel';
 import OutputPanel from '../components/code/OutputPanel';
 import LanguagePicker from '../components/code/LanguagePicker';
 import BrutalCard from '../components/ui/BrutalCard';
-import { Code2, Save, FolderOpen } from 'lucide-react';
-
-const DEFAULT_CODE = {
-  python: '# Python playground\nprint("Hello from VANTA!")\n\nfor i in range(5):\n    print(f"Step {i + 1}")\n',
-  javascript: '// JavaScript playground\nconsole.log("Hello from VANTA!");\n\nfor (let i = 0; i < 5; i++) {\n  console.log("Step", i + 1);\n}\n',
-  cpp: '// C++ via Piston API\n#include <iostream>\n#include <vector>\n\nint main() {\n    std::cout << "Hello from VANTA!" << std::endl;\n\n    std::vector<int> v = {1, 2, 3, 4, 5};\n    for (int x : v) std::cout << x << " ";\n    std::cout << std::endl;\n    return 0;\n}\n',
-};
+import { Code2, FolderOpen } from 'lucide-react';
+import { getLanguage } from '../config/languages';
+import { runViaPiston } from '../lib/pistonClient';
 
 export default function CodePlayground() {
   const [language, setLanguage] = useState('python');
-  const [code, setCode] = useState(DEFAULT_CODE.python);
+  const [code, setCode] = useState(getLanguage('python').starter);
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const [running, setRunning] = useState(false);
@@ -26,69 +22,83 @@ export default function CodePlayground() {
   const [aiReview, setAiReview] = useState('');
 
   const { runPython, loading: pyLoading } = usePyodide();
-  const { sendTutorMessage, loading: aiLoading } = useGemini();
+  const { sendTutorMessage } = useGemini();
 
-  const handleLanguageChange = (lang) => {
-    setLanguage(lang);
-    setCode(DEFAULT_CODE[lang] || '');
+  const handleLanguageChange = (id) => {
+    setLanguage(id);
+    setCode(getLanguage(id).starter);
     setOutput('');
     setError('');
     setAiReview('');
+  };
+
+  // --- Runners map. Add a new language in config/languages.js; no change here needed
+  //     unless the language uses a bespoke in-browser runtime (like Pyodide).
+  const runners = {
+    python: async (src) => {
+      const r = await runPython(src);
+      return { stdout: r.output || '', stderr: r.error || '' };
+    },
+    javascript: async (src) => {
+      const logs = [];
+      const mockConsole = {
+        log: (...a) => logs.push(a.map(String).join(' ')),
+        error: (...a) => logs.push('ERROR: ' + a.map(String).join(' ')),
+        warn: (...a) => logs.push('WARN: ' + a.map(String).join(' ')),
+      };
+      // eslint-disable-next-line no-new-func
+      const fn = new Function('console', src);
+      fn(mockConsole);
+      return { stdout: logs.join('\n'), stderr: '' };
+    },
+    typescript: async (src) => {
+      // Strip type annotations lightly, then run as JS. Good enough for playground.
+      const stripped = src
+        .replace(/:\s*[A-Za-z_$][\w$<>[\],\s|&'"`?]*(?=[),=;])/g, '')
+        .replace(/\bas\s+[A-Za-z_$][\w$<>[\],\s|&]*/g, '')
+        .replace(/\binterface\s+\w+\s*\{[^}]*\}/g, '')
+        .replace(/\btype\s+\w+\s*=[^;]+;/g, '');
+      return runners.javascript(stripped);
+    },
+  };
+
+  const runViaConfig = async (lang, src) => {
+    if (lang.runner === 'browser' && runners[lang.id]) {
+      return runners[lang.id](src);
+    }
+    if (lang.runner === 'piston') {
+      const r = await runViaPiston({
+        language: lang.piston.language,
+        filename: lang.piston.filename,
+        code: src,
+      });
+      return {
+        stdout: r.stdout,
+        stderr: r.compileError ? `Compile error:\n${r.compileError}` : r.stderr,
+      };
+    }
+    throw new Error(`No runner for language: ${lang.id}`);
   };
 
   const handleRun = useCallback(async () => {
     setRunning(true);
     setOutput('');
     setError('');
-
     try {
-      if (language === 'python') {
-        const result = await runPython(code);
-        setOutput(result.output || '');
-        if (result.error) setError(result.error);
-      } else if (language === 'javascript') {
-        const logs = [];
-        const mockConsole = {
-          log: (...args) => logs.push(args.map(String).join(' ')),
-          error: (...args) => logs.push('ERROR: ' + args.map(String).join(' ')),
-          warn: (...args) => logs.push('WARN: ' + args.map(String).join(' ')),
-        };
-        try {
-          const fn = new Function('console', code);
-          fn(mockConsole);
-          setOutput(logs.join('\n'));
-        } catch (e) {
-          setError(e.message);
-        }
-      } else if (language === 'cpp') {
-        // Compile & run via Piston (free, no auth needed)
-        const res = await fetch('https://emkc.org/api/v2/piston/execute', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            language: 'c++',
-            version: '*',
-            files: [{ name: 'main.cpp', content: code }],
-          }),
-        });
-        if (!res.ok) throw new Error('Piston API request failed');
-        const data = await res.json();
-        const run = data.run || {};
-        const compile = data.compile || {};
-        if (compile.stderr) {
-          setError('Compile error:\n' + compile.stderr);
-        } else if (run.stderr) {
-          setError(run.stderr);
-          if (run.stdout) setOutput(run.stdout);
-        } else {
-          setOutput(run.stdout || '(no output)');
-        }
-      }
+      const lang = getLanguage(language);
+      const { stdout, stderr } = await runViaConfig(lang, code);
+      if (stdout) setOutput(stdout);
+      if (stderr) setError(stderr);
+      if (!stdout && !stderr) setOutput('(no output)');
     } catch (e) {
       setError(e.message);
     } finally {
       setRunning(false);
     }
+    // runViaConfig closes over runners which closes over runPython; runPython
+    // is stable from usePyodide, and language/code change on every keystroke —
+    // depending on them here is correct.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language, code, runPython]);
 
   const handleSave = async () => {
@@ -139,7 +149,7 @@ export default function CodePlayground() {
         <BrutalCard className="p-0 overflow-hidden">
           <EditorPanel
             code={code}
-            language={language}
+            language={getLanguage(language).monaco || language}
             onChange={setCode}
             onRun={handleRun}
             onSave={handleSave}
@@ -159,7 +169,6 @@ export default function CodePlayground() {
         </div>
       </div>
 
-      {/* Snippet drawer */}
       {showSnippets && (
         <BrutalCard>
           <div className="flex items-center justify-between mb-3">
