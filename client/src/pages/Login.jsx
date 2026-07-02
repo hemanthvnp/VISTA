@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import { login as loginAPI } from '../api/auth';
-import { Zap, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Eye, Mail, Lock, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -33,9 +33,9 @@ export default function Login() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Zap className="w-12 h-12 text-brutal-mint mx-auto mb-3" />
-          <h1 className="font-heading text-brutal-mint font-bold text-2xl tracking-wider">V</h1>
-          <p className="text-text-muted text-sm mt-1">Type better. Learn deeper. Build smarter.</p>
+          <Eye className="w-12 h-12 text-brutal-purple mx-auto mb-3" />
+          <h1 className="font-heading text-brutal-mint font-bold text-2xl tracking-wider">VISTA</h1>
+          <p className="text-text-muted text-sm mt-1">Virtual Intelligent Skill & Technical Assistant</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-bg-card border-2 border-brutal-black rounded-lg shadow-brutal-lg p-6">
@@ -56,7 +56,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-bg-card border-2 border-brutal-black rounded-lg pl-10 pr-4 py-2.5 text-text-primary text-sm focus:border-brutal-purple focus:outline-none transition-colors"
-                placeholder="pilot@v.dev"
+                placeholder="pilot@vista.dev"
                 required
               />
             </div>

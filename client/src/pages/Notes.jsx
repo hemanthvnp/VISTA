@@ -1,18 +1,13 @@
-/** @fileoverview Notes page - per-technology markdown notes with auto-save, AI quality check, and Medium publishing */
+/** @fileoverview Notes page - per-technology markdown notes with auto-save and AI quality check */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import useNotesStore from '../store/useNotesStore';
 import useAppStore from '../store/useAppStore';
-import {
-  getNotes, updateNotes, checkNoteQuality, publishNoteToMedium,
-  connectMedium, getMediumStatus, disconnectMedium,
-} from '../api/learning';
+import { getNotes, updateNotes, checkNoteQuality } from '../api/learning';
 import BrutalCard from '../components/ui/BrutalCard';
 import QualityScore from '../components/notes/QualityScore';
-import MediumConnectionPanel from '../components/notes/MediumConnectionPanel';
+import PublishRecommendation from '../components/notes/PublishRecommendation';
 import { TECHNOLOGIES } from '../utils/typingGeminiPrompt';
-import { FileText, Save, Download, Hash, Sparkles, Send, CheckCircle2, ExternalLink } from 'lucide-react';
-
-const PUBLISH_THRESHOLD = 70;
+import { FileText, Save, Download, Hash, Sparkles } from 'lucide-react';
 
 export default function Notes() {
   const { currentTechId, setCurrentTech, setNoteContent, getNoteContent } = useNotesStore();
@@ -22,18 +17,11 @@ export default function Notes() {
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [checkingQuality, setCheckingQuality] = useState(false);
-  const [publishing, setPublishing] = useState(false);
-  const [mediumStatus, setMediumStatus] = useState(null);
-  const [connectingMedium, setConnectingMedium] = useState(false);
   const saveTimerRef = useRef(null);
 
   useEffect(() => {
     if (!currentTechId && activeTech) setCurrentTech(activeTech);
   }, [activeTech]);
-
-  useEffect(() => {
-    getMediumStatus().then(setMediumStatus).catch(() => setMediumStatus({ connected: false }));
-  }, []);
 
   useEffect(() => {
     const cached = getNoteContent(currentTechId);
@@ -101,42 +89,8 @@ export default function Notes() {
     }
   };
 
-  const handlePublish = async () => {
-    setPublishing(true);
-    try {
-      const result = await publishNoteToMedium(currentTechId);
-      setNote(result);
-    } catch (e) {
-      console.error('Publish error:', e);
-      alert(e.payload?.message || e.message || 'Publish failed.');
-    } finally {
-      setPublishing(false);
-    }
-  };
-
-  const handleMediumConnect = async (token) => {
-    setConnectingMedium(true);
-    try {
-      await connectMedium(token);
-      const status = await getMediumStatus();
-      setMediumStatus(status);
-    } finally {
-      setConnectingMedium(false);
-    }
-  };
-
-  const handleMediumDisconnect = async () => {
-    try {
-      await disconnectMedium();
-      setMediumStatus({ connected: false });
-    } catch (e) {
-      console.error('Medium disconnect error:', e);
-    }
-  };
-
   const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
   const isStale = note?.qualityScore != null && note?.content !== content;
-  const isEligible = mediumStatus?.connected && note?.qualityScore != null && note.qualityScore >= PUBLISH_THRESHOLD && !isStale;
 
   return (
     <div className="flex gap-4 h-[calc(100vh-8rem)]">
@@ -195,14 +149,14 @@ export default function Notes() {
         />
       </div>
 
-      {/* Publish Panel */}
+      {/* Right Panel */}
       <div className="w-80 flex-shrink-0 space-y-3 overflow-y-auto">
         <BrutalCard>
           <h3 className="text-sm font-semibold text-text-primary mb-1 flex items-center gap-2">
             <Sparkles size={15} className="text-brutal-purple" /> Quality Check
           </h3>
           <p className="text-xs text-text-muted mb-3">
-            Get an AI assessment of how publish-ready this note is before sending it to Medium.
+            Get an AI assessment of how publish-ready this note is.
           </p>
           <button
             onClick={handleCheckQuality}
@@ -228,60 +182,10 @@ export default function Notes() {
           )}
         </BrutalCard>
 
-        <MediumConnectionPanel
-          status={mediumStatus}
-          onConnect={handleMediumConnect}
-          onDisconnect={handleMediumDisconnect}
-          connecting={connectingMedium}
+        <PublishRecommendation
+          qualityScore={note?.qualityScore}
+          onExport={handleExport}
         />
-
-        {note?.mediumPostUrl ? (
-          <BrutalCard color="mint">
-            <h4 className="text-xs font-bold uppercase tracking-wide text-success-text flex items-center gap-1.5 mb-2">
-              <CheckCircle2 size={13} /> Published on Medium
-            </h4>
-            <p className="text-xs text-text-muted mb-2">
-              {note.publishedAt ? new Date(note.publishedAt).toLocaleDateString() : ''}
-            </p>
-            <a
-              href={note.mediumPostUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="text-xs text-brutal-purple hover:underline inline-flex items-center gap-1"
-            >
-              View on Medium <ExternalLink size={11} />
-            </a>
-          </BrutalCard>
-        ) : (
-          <BrutalCard>
-            <button
-              onClick={handlePublish}
-              disabled={!isEligible || publishing}
-              title={!isEligible ? `Connect Medium and reach a quality score of ${PUBLISH_THRESHOLD}+ to publish` : ''}
-              className="w-full px-4 py-2.5 bg-brutal-yellow text-text-primary border-2 border-brutal-black rounded-lg text-sm font-semibold flex items-center justify-center gap-2 hover:bg-brutal-yellow/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {publishing ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-text-primary border-t-transparent rounded-full animate-spin" />
-                  Publishing...
-                </>
-              ) : (
-                <>
-                  <Send size={15} /> Publish to Medium
-                </>
-              )}
-            </button>
-            {!isEligible && (
-              <p className="text-xs text-text-muted mt-2 text-center">
-                {!mediumStatus?.connected
-                  ? 'Connect Medium above to enable publishing.'
-                  : isStale
-                    ? 'Re-run Check Quality after your edits to publish.'
-                    : `Reach a quality score of ${PUBLISH_THRESHOLD}+ to publish.`}
-              </p>
-            )}
-          </BrutalCard>
-        )}
       </div>
     </div>
   );

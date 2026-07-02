@@ -7,7 +7,7 @@ import { getRankFromXP, RANK_EMOJIS, getLevelFromXP } from '../../utils/xpCalc';
 import {
   LayoutDashboard, Map, BookOpen, Code2, Brain,
   MessageSquare, Calendar, StickyNote, Hammer, Trophy, Settings,
-  ChevronLeft, ChevronRight, Zap, GraduationCap,
+  ChevronLeft, ChevronRight, Eye, GraduationCap,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -37,9 +37,9 @@ export default function Sidebar() {
     <aside className={`${sidebarOpen ? 'w-56' : 'w-16'} bg-bg-card border-r-2 border-brutal-black flex flex-col transition-all duration-300 h-screen sticky top-0`}>
       {/* Logo */}
       <div className="p-4 flex items-center gap-2 border-b-2 border-brutal-black">
-        <Zap className="text-brutal-purple w-6 h-6 flex-shrink-0" />
+        <Eye className="text-brutal-purple w-6 h-6 flex-shrink-0" />
         {sidebarOpen && (
-          <span className="font-heading text-brutal-purple font-bold text-lg tracking-wider">V</span>
+          <span className="font-heading text-brutal-purple font-bold text-lg tracking-wider">VISTA</span>
         )}
       </div>
 

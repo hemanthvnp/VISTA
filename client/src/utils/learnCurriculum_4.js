@@ -258,7 +258,7 @@ class User(BaseModel):
 
 # Test valid user
 try:
-    u = User(id=1, name="Shane", email="shane@example.com", age=22)
+    u = User(id=1, name="Hemanth", email="shane@example.com", age=22)
     print(f"Valid user: {u.dict()}")
 except ValidationError as e:
     print(f"Error: {e}")
@@ -266,7 +266,7 @@ except ValidationError as e:
 # Test invalid user
 for bad in [
     {"id": 2, "name": "X", "email": "valid@x.com"},   # name too short
-    {"id": 3, "name": "Shane", "email": "not-an-email"}, # bad email
+    {"id": 3, "name": "Hemanth", "email": "not-an-email"}, # bad email
 ]:
     try:
         User(**bad)

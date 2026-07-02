@@ -1,48 +1,41 @@
 /**
- * Thin client for the public Piston code-execution API.
- * Docs: https://github.com/engineer-man/piston
- *
- * We use the public instance at emkc.org. Rate limit: 200 req/hr per IP.
- * To self-host, override PISTON_URL below or via VITE_PISTON_URL env.
+ * Code execution client — routes through the VISTA backend (self-hosted Piston proxy).
+ * The public Piston API (emkc.org) became whitelist-only in Feb 2026; we now
+ * proxy through Express so the Piston URL stays server-side.
  */
 
-const PISTON_URL =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_PISTON_URL) ||
-  'https://emkc.org/api/v2/piston';
+function getAuthHeader() {
+  const token = localStorage.getItem('vanta_token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 /**
- * Execute code via Piston.
+ * Execute code via the backend Piston proxy.
  *
  * @param {Object} params
- * @param {string} params.language   Piston language name (e.g. 'python', 'c++', 'csharp.net')
- * @param {string} params.filename   Source filename (matters for Java's public class name)
+ * @param {string} params.language   Piston language name (e.g. 'python', 'c++', 'dart')
+ * @param {string} params.filename   Source filename — matters for Java (must match public class)
  * @param {string} params.code       Source code
- * @param {string} [params.stdin]    Optional stdin fed to the program
- * @param {string} [params.version]  Runtime version, defaults to '*' (latest available)
+ * @param {string} [params.stdin]    Optional stdin
+ * @param {string} [params.version]  Runtime version, defaults to '*' (latest installed)
  * @returns {Promise<{ stdout: string, stderr: string, compileError: string, exitCode: number }>}
  */
 export async function runViaPiston({ language, filename, code, stdin = '', version = '*' }) {
-  const res = await fetch(`${PISTON_URL}/execute`, {
+  const res = await fetch('/api/code/run', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      language,
-      version,
-      files: [{ name: filename, content: code }],
-      stdin,
-    }),
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify({ language, filename, code, stdin, version }),
   });
 
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`Piston HTTP ${res.status}${body ? ': ' + body : ''}`);
+    throw new Error(data.error || `Code execution failed (${res.status})`);
   }
 
-  const data = await res.json();
   return {
-    stdout: data?.run?.stdout ?? '',
-    stderr: data?.run?.stderr ?? '',
-    compileError: data?.compile?.stderr ?? '',
-    exitCode: data?.run?.code ?? 0,
+    stdout:       data.stdout       || '',
+    stderr:       data.stderr       || '',
+    compileError: data.compileError || '',
+    exitCode:     data.exitCode     || 0,
   };
 }

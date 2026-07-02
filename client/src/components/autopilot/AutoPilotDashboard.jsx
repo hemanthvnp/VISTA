@@ -49,7 +49,7 @@ export default function AutoPilotDashboard() {
     <div className="space-y-3">
       <h3 className="text-sm font-heading text-text-secondary flex items-center gap-2">
         <Zap size={14} className="text-brutal-mint fill-current" />
-        AutoPilot — what V wants you to do
+        AutoPilot — what VISTA wants you to do
       </h3>
       {nextActions.map((action) => (
         <ActionCard key={action.id} action={action} onDismiss={handleDismissAction} />

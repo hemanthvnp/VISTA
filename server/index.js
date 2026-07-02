@@ -22,7 +22,7 @@ app.use('/api/achievements', require('./routes/achievements'));
 app.use('/api/python', require('./routes/python'));
 app.use('/api/autopilot', require('./routes/autopilot'));
 app.use('/api/projects', require('./routes/projects'));
-app.use('/api/medium', require('./routes/medium'));
+app.use('/api/code', require('./routes/codeRunner'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -30,10 +30,6 @@ app.get('/api/health', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5001;
-
-if (!process.env.ENCRYPTION_KEY) {
-  console.warn('[Startup] ENCRYPTION_KEY is not set — Medium account connections will fail to save until it is configured in server/.env.');
-}
 
 connectDB().then(() => {
   app.listen(PORT, () => {

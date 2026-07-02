@@ -1,4 +1,4 @@
-/** @fileoverview Date/time utility functions for VANTA */
+/** @fileoverview Date/time utility functions for VISTA */
 
 /** Returns today as 'YYYY-MM-DD' string */
 export const getTodayString = () => new Date().toISOString().split('T')[0];

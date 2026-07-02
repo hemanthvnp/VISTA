@@ -1,27 +1,23 @@
 /** @fileoverview Combined learn curriculum — all 10 technologies */
 export { TOPIC_COLOR_CLASSES } from './pythonCurriculum';
 export { PYTHON_LEARN, CPP_LEARN, GIT_LEARN } from './learnCurriculum_1';
-export { UE5_LEARN, BLENDER_LEARN, PYTORCH_LEARN } from './learnCurriculum_2';
-export { RL_LEARN, ZEROMQ_LEARN } from './learnCurriculum_3';
-export { FASTAPI_LEARN, FL_LEARN } from './learnCurriculum_4';
+export { JS_LEARN, TS_LEARN, REACT_LEARN, NODEJS_LEARN, SQL_LEARN, JAVA_LEARN, DSA_LEARN } from './learnCurriculum_5';
 
 import { PYTHON_LEARN, CPP_LEARN, GIT_LEARN } from './learnCurriculum_1';
-import { UE5_LEARN, BLENDER_LEARN, PYTORCH_LEARN } from './learnCurriculum_2';
-import { RL_LEARN, ZEROMQ_LEARN } from './learnCurriculum_3';
-import { FASTAPI_LEARN, FL_LEARN } from './learnCurriculum_4';
+import { JS_LEARN, TS_LEARN, REACT_LEARN, NODEJS_LEARN, SQL_LEARN, JAVA_LEARN, DSA_LEARN } from './learnCurriculum_5';
 
 /** Ordered list of all tech curricula */
 export const ALL_TECHS = [
-    { id: 'python', ...PYTHON_LEARN },
-    { id: 'cpp', ...CPP_LEARN },
-    { id: 'ue5', ...UE5_LEARN },
-    { id: 'blender', ...BLENDER_LEARN },
-    { id: 'git', ...GIT_LEARN },
-    { id: 'pytorch', ...PYTORCH_LEARN },
-    { id: 'rl-ppo', ...RL_LEARN },
-    { id: 'zeromq', ...ZEROMQ_LEARN },
-    { id: 'fastapi', ...FASTAPI_LEARN },
-    { id: 'federated-learning', ...FL_LEARN },
+    { id: 'python',     ...PYTHON_LEARN  },
+    { id: 'javascript', ...JS_LEARN      },
+    { id: 'git',        ...GIT_LEARN     },
+    { id: 'sql',        ...SQL_LEARN     },
+    { id: 'cpp',        ...CPP_LEARN     },
+    { id: 'typescript', ...TS_LEARN      },
+    { id: 'react',      ...REACT_LEARN   },
+    { id: 'nodejs',     ...NODEJS_LEARN  },
+    { id: 'java',       ...JAVA_LEARN    },
+    { id: 'dsa',        ...DSA_LEARN     },
 ];
 
 /** Quick lookup by tech ID */

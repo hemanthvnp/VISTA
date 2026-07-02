@@ -1,6 +1,6 @@
 /** @fileoverview Full-screen daily typing gate with countdown timer and typing test */
 import { useState, useCallback, useEffect } from 'react';
-import { Zap, SkipForward, X } from 'lucide-react';
+import { Eye, SkipForward, X } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import useAppStore from '../../store/useAppStore';
 import useTypingSession from '../../hooks/useTypingSession';
@@ -95,7 +95,7 @@ export default function GateScreen({ onComplete }) {
     return (
       <div className="fixed inset-0 bg-bg-primary z-50 flex items-center justify-center">
         <div className="text-center animate-fadeIn">
-          <Zap className="w-16 h-16 text-brutal-mint mx-auto mb-4 animate-pulse" />
+          <Eye className="w-16 h-16 text-brutal-mint mx-auto mb-4 animate-pulse" />
           <h2 className="text-3xl font-heading font-bold text-text-primary mb-4">Gate Complete!</h2>
           <div className="flex gap-8 justify-center">
             <div>
@@ -120,7 +120,7 @@ export default function GateScreen({ onComplete }) {
     <div className="fixed inset-0 bg-bg-primary z-50 flex flex-col items-center justify-center p-6 overflow-hidden">
       {/* Header */}
       <div className="text-center mb-6">
-        <Zap className="w-10 h-10 text-brutal-mint mx-auto mb-2" />
+        <Eye className="w-10 h-10 text-brutal-mint mx-auto mb-2" />
         <h1 className="text-xl font-heading font-bold text-text-primary">Daily Training Gate</h1>
         <span className="text-xs text-text-muted uppercase tracking-wider">{mode} mode</span>
       </div>

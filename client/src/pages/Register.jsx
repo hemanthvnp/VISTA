@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import { register as registerAPI } from '../api/auth';
-import { Zap, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Eye, User, Mail, Lock, EyeOff } from 'lucide-react';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -42,8 +42,8 @@ export default function Register() {
     <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <Zap className="w-12 h-12 text-brutal-mint mx-auto mb-3" />
-          <h1 className="font-heading text-brutal-mint font-bold text-2xl tracking-wider">V</h1>
+          <Eye className="w-12 h-12 text-brutal-purple mx-auto mb-3" />
+          <h1 className="font-heading text-brutal-mint font-bold text-2xl tracking-wider">VISTA</h1>
           <p className="text-text-muted text-sm mt-1">Begin your evolution.</p>
         </div>
 
@@ -80,7 +80,7 @@ export default function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-bg-card border-2 border-brutal-black rounded-lg pl-10 pr-4 py-2.5 text-text-primary text-sm focus:border-brutal-purple focus:outline-none transition-colors"
-                placeholder="pilot@v.dev"
+                placeholder="pilot@vista.dev"
                 required
               />
             </div>

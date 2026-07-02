@@ -89,8 +89,10 @@ const SECTION_LABELS = { theory: 'Theory', code: 'Code', challenge: 'Challenge' 
 /* Language detection for Monaco */
 function detectLang(code = '') {
     if (code.includes('#include') || code.includes('std::')) return 'cpp';
-    if (code.includes('import torch') || code.includes('import gym') || code.includes('def ') || code.includes('import ')) return 'python';
-    if (code.startsWith('//') || code.includes('from fastapi')) return 'python';
+    if (code.includes('public class') || code.includes('public static void main')) return 'java';
+    if (code.includes('SELECT') || code.includes('CREATE TABLE')) return 'sql';
+    if (code.includes('console.log') || code.includes('=>') || code.includes('const ') || code.includes('let ')) return 'javascript';
+    if (code.includes('def ') || code.includes('import ') || code.includes('print(')) return 'python';
     return 'python';
 }
 

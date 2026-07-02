@@ -113,7 +113,7 @@ export default function Settings() {
       {/* AutoPilot */}
       <BrutalCard>
         <h3 className="text-sm text-text-secondary mb-3 flex items-center gap-2"><Zap size={16} className="text-brutal-mint" /> AutoPilot Mode</h3>
-        <p className="text-xs text-text-muted mb-3">When enabled, V drives your learning — adaptive drills, AI-generated content, and proactive coaching.</p>
+        <p className="text-xs text-text-muted mb-3">When enabled, VISTA drives your learning — adaptive drills, AI-generated content, and proactive coaching.</p>
         <AutoPilotToggle />
       </BrutalCard>
 
@@ -184,7 +184,7 @@ export default function Settings() {
       {/* About */}
       <BrutalCard>
         <h3 className="text-sm text-text-secondary mb-2 flex items-center gap-2"><Info size={16} /> About</h3>
-        <p className="text-xs text-text-muted">V v1.0 — Velocity-Accelerated NPC Training Architecture</p>
+        <p className="text-xs text-text-muted">VISTA v1.0 — Virtual Intelligent Skill & Technical Assistant</p>
         <p className="text-xs text-text-muted mt-1">Vite + React 18 | Express.js | MongoDB | Gemini AI | scikit-learn</p>
       </BrutalCard>
     </div>

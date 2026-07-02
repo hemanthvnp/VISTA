@@ -27,7 +27,7 @@ import Settings from './pages/Settings';
 import LearnHub from './pages/LearnHub';
 import LearnTopics from './pages/LearnTopics';
 import LearnLesson from './pages/LearnLesson';
-import { Zap } from 'lucide-react';
+import { Eye } from 'lucide-react';
 
 function ProtectedRoute({ children }) {
   const token = useAuthStore((s) => s.token);
@@ -44,9 +44,9 @@ function SplashScreen({ onDone }) {
   return (
     <div className="fixed inset-0 bg-bg-primary z-50 flex items-center justify-center">
       <div className="text-center animate-fadeIn">
-        <Zap className="w-16 h-16 text-brutal-mint mx-auto mb-4 animate-pulse" />
-        <h1 className="font-heading text-brutal-mint font-bold text-3xl tracking-widest">V</h1>
-        <p className="text-text-muted text-sm mt-2">Type better. Learn deeper. Build smarter.</p>
+        <Eye className="w-16 h-16 text-brutal-mint mx-auto mb-4 animate-pulse" />
+        <h1 className="font-heading text-brutal-mint font-bold text-3xl tracking-widest">VISTA</h1>
+        <p className="text-text-muted text-sm mt-2">Virtual Intelligent Skill & Technical Assistant</p>
       </div>
     </div>
   );
@@ -92,7 +92,7 @@ export default function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-bg-primary flex items-center justify-center">
-        <Zap className="w-8 h-8 text-brutal-mint animate-pulse" />
+        <Eye className="w-8 h-8 text-brutal-mint animate-pulse" />
       </div>
     );
   }

@@ -4,189 +4,192 @@ const TypingSession = require('../models/TypingSession');
 const Progress = require('../models/Progress');
 const User = require('../models/User');
 const FlashcardProgress = require('../models/FlashcardProgress');
-const ScheduleWeek = require('../models/ScheduleWeek');
 const Note = require('../models/Note');
-const MlAnalysis = require('../models/MlAnalysis');
 const ChatHistory = require('../models/ChatHistory');
 const CodeSnippet = require('../models/CodeSnippet');
+const ProjectSubmission = require('../models/ProjectSubmission');
 const auth = require('../middleware/auth');
 
+// Single source of truth — frontend reads these directly from the API
 const ALL_BADGES = [
-  // Typing (15)
-  { id: 'first-keystrokes', name: 'First Keystrokes', category: 'typing', description: 'Complete your first gate session' },
-  { id: 'home-row-hero', name: 'Home Row Hero', category: 'typing', description: 'Pass Level 1 with 90%+ accuracy' },
-  { id: 'full-alphabet', name: 'Full Alphabet', category: 'typing', description: 'Pass Level 5' },
-  { id: 'symbol-master', name: 'Symbol Master', category: 'typing', description: 'Pass Level 7' },
-  { id: 'code-typist', name: 'Code Typist', category: 'typing', description: 'Pass Level 8 at 50+ WPM' },
-  { id: 'speed-30', name: 'Speed 30', category: 'typing', description: 'Reach 30 WPM' },
-  { id: 'speed-50', name: 'Speed 50', category: 'typing', description: 'Reach 50 WPM' },
-  { id: 'speed-70', name: 'Speed 70', category: 'typing', description: 'Reach 70 WPM' },
-  { id: 'speed-100', name: 'Speed 100', category: 'typing', description: 'Reach 100 WPM' },
-  { id: 'consistent', name: 'Consistent', category: 'typing', description: '7 sessions in a row with 90%+ accuracy' },
-  { id: 'data-scientist', name: 'Data Scientist', category: 'typing', description: 'Run ML model 10 times' },
-  { id: 'gate-keeper', name: 'Gate Keeper', category: 'typing', description: 'Complete 30 gates without skipping' },
-  { id: 'marathon-typist', name: 'Marathon Typist', category: 'typing', description: '50 total typing sessions' },
-  { id: 'night-owl', name: 'Night Owl', category: 'typing', description: 'Complete a gate after 11 PM' },
-  { id: 'early-bird', name: 'Early Bird', category: 'typing', description: 'Complete a gate before 7 AM' },
-  // Learning (15)
-  { id: 'first-lesson', name: 'First Lesson', category: 'learning', description: 'Complete Week 1' },
-  { id: 'tech-explorer', name: 'Tech Explorer', category: 'learning', description: 'Start 3 different technologies' },
-  { id: 'deep-diver', name: 'Deep Diver', category: 'learning', description: 'Complete any single technology 100%' },
-  { id: 'flashcard-rookie', name: 'Flashcard Rookie', category: 'learning', description: 'Review 50 flashcards' },
-  { id: 'flashcard-master', name: 'Flashcard Master', category: 'learning', description: 'Review 500 flashcards' },
-  { id: 'code-runner', name: 'Code Runner', category: 'learning', description: 'Run code 25 times in Code Playground' },
-  { id: 'note-taker', name: 'Note Taker', category: 'learning', description: 'Write 1,000+ words across all notes' },
-  { id: 'project-starter', name: 'Project Starter', category: 'learning', description: 'Start your first mini project' },
-  { id: 'project-finisher', name: 'Project Finisher', category: 'learning', description: 'Complete your first mini project' },
-  { id: 'halfway-there', name: 'Halfway There', category: 'learning', description: 'Complete 5 mini projects' },
-  { id: 'builder', name: 'Builder', category: 'learning', description: 'Complete all 10 mini projects' },
-  { id: 'curious-mind', name: 'Curious Mind', category: 'learning', description: 'Ask AI Tutor 50 questions' },
-  { id: 'scholar', name: 'Scholar', category: 'learning', description: 'Study for 100+ total hours' },
-  { id: 'roadmap-50', name: 'Roadmap 50%', category: 'learning', description: 'Complete 5 of 10 technologies' },
-  { id: 'the-long-game', name: 'The Long Game', category: 'learning', description: 'Complete all 10 technologies' },
-  // V Cross-System (10)
-  { id: 'dual-threat', name: 'Dual Threat', category: 'codec', description: '7 gates no skip + 7 weeks completed', emoji: '🔥', xpBonus: 250 },
-  { id: 'codec-initiate', name: 'V Initiate', category: 'codec', description: '30+ WPM + first project complete', emoji: '⚡', xpBonus: 250 },
-  { id: 'precision-coder', name: 'Precision Coder', category: 'codec', description: '95%+ accuracy + 90% flashcard', emoji: '🎯', xpBonus: 250 },
-  { id: 'mind-and-fingers', name: 'Mind & Fingers', category: 'codec', description: 'Level 5 + Python complete', emoji: '🧠', xpBonus: 250 },
-  { id: 'developer-dna', name: 'Developer DNA', category: 'codec', description: '50+ WPM + 3 projects', emoji: '💻', xpBonus: 250 },
-  { id: 'npc-awakened', name: 'NPC Awakened', category: 'codec', description: 'All 8 levels + 5 techs', emoji: '🤖', xpBonus: 250 },
-  { id: 'machine-learning-badge', name: 'Machine Learning', category: 'codec', description: 'ML 20x + PyTorch complete', emoji: '⚙️', xpBonus: 250 },
-  { id: 'grinder', name: 'Grinder', category: 'codec', description: '100 sessions + 200 hours', emoji: '🏋️', xpBonus: 250 },
-  { id: 'all-rounder', name: 'All-Rounder', category: 'codec', description: '70+ WPM + all 10 techs started', emoji: '🌟', xpBonus: 250 },
-  { id: 'the-codec', name: 'THE V', category: 'codec', description: '80+ WPM + all levels + all techs + all projects', emoji: '👾', xpBonus: 250 },
+  // ── Learner ──────────────────────────────────────────────────────────────
+  { id: 'first-lesson',     category: 'learner',  emoji: '📖', name: 'First Step',         description: 'Complete your first lesson section' },
+  { id: 'lesson-veteran',   category: 'learner',  emoji: '🎓', name: 'Lesson Veteran',      description: 'Complete 25 lesson sections' },
+  { id: 'tech-explorer',    category: 'learner',  emoji: '🗺️', name: 'Tech Explorer',       description: 'Study 3+ different technologies' },
+  { id: 'deep-diver',       category: 'learner',  emoji: '🏊', name: 'Deep Diver',          description: 'Complete any technology 100%' },
+  { id: 'roadmap-half',     category: 'learner',  emoji: '🗝️', name: 'Halfway There',       description: 'Complete 5 technologies' },
+  { id: 'flashcard-rookie', category: 'learner',  emoji: '🃏', name: 'Flashcard Rookie',    description: 'Review 50 flashcards' },
+  { id: 'flashcard-master', category: 'learner',  emoji: '🧠', name: 'Flashcard Master',    description: 'Review 500 flashcards' },
+  { id: 'note-taker',       category: 'learner',  emoji: '📝', name: 'Note Taker',          description: 'Write 500+ words across your notes' },
+  { id: 'note-author',      category: 'learner',  emoji: '✍️', name: 'Note Author',         description: 'Score 70+ on a note quality check' },
+  { id: 'deep-notes',       category: 'learner',  emoji: '📓', name: 'Deep Notes',           description: 'Write 2000+ words across your notes' },
+  { id: 'scholar',          category: 'learner',  emoji: '📚', name: 'Scholar',             description: 'Accumulate 100+ total study hours' },
+  { id: 'century-club',     category: 'learner',  emoji: '🏆', name: 'Century Club',        description: 'Complete all 10 technologies' },
+
+  // ── Builder ──────────────────────────────────────────────────────────────
+  { id: 'first-submission', category: 'builder',  emoji: '🔨', name: 'First Submission',    description: 'Submit your first GitHub project' },
+  { id: 'project-bronze',   category: 'builder',  emoji: '🥉', name: 'Bronze Coder',        description: 'Score 50+ on an AI project review' },
+  { id: 'project-silver',   category: 'builder',  emoji: '🥈', name: 'Silver Coder',        description: 'Score 70+ on an AI project review' },
+  { id: 'project-gold',     category: 'builder',  emoji: '🥇', name: 'Gold Coder',          description: 'Score 85+ on an AI project review' },
+  { id: 'multi-builder',    category: 'builder',  emoji: '🏗️', name: 'Multi Builder',       description: 'Submit 3+ projects' },
+  { id: 'code-curious',     category: 'builder',  emoji: '💻', name: 'Code Curious',        description: 'Save 5 code snippets in the playground' },
+  { id: 'polyglot',         category: 'builder',  emoji: '🌍', name: 'Polyglot',            description: 'Save snippets in 5+ different languages' },
+  { id: 'snippet-saver',    category: 'builder',  emoji: '💾', name: 'Snippet Saver',       description: 'Save 10+ code snippets' },
+
+  // ── Grind ────────────────────────────────────────────────────────────────
+  { id: 'gate-first',       category: 'grind',    emoji: '🚪', name: 'Gatebreaker',         description: 'Complete your first daily gate' },
+  { id: 'gate-keeper',      category: 'grind',    emoji: '🛡️', name: 'Gate Keeper',         description: 'Complete 30 gates without skipping' },
+  { id: 'streak-3',         category: 'grind',    emoji: '🔥', name: 'On Fire',             description: 'Maintain a 3-day streak' },
+  { id: 'streak-7',         category: 'grind',    emoji: '🔥', name: 'Week Warrior',        description: 'Maintain a 7-day streak' },
+  { id: 'streak-30',        category: 'grind',    emoji: '💎', name: 'Diamond Streak',      description: 'Maintain a 30-day streak' },
+  { id: 'early-bird',       category: 'grind',    emoji: '🌅', name: 'Early Bird',          description: 'Complete a gate before 7 AM' },
+  { id: 'night-owl',        category: 'grind',    emoji: '🦉', name: 'Night Owl',           description: 'Complete a gate after 11 PM' },
+  { id: 'time-lord',        category: 'grind',    emoji: '⏱️', name: 'Time Lord',           description: 'Accumulate 200+ total study hours' },
+
+  // ── Explorer ─────────────────────────────────────────────────────────────
+  { id: 'first-question',   category: 'explorer', emoji: '🤖', name: 'AI Curious',          description: 'Ask the AI Tutor your first question' },
+  { id: 'curious-mind',     category: 'explorer', emoji: '💬', name: 'Curious Mind',        description: 'Ask the AI Tutor 50 questions' },
+  { id: 'knowledge-seeker', category: 'explorer', emoji: '🔍', name: 'Knowledge Seeker',    description: 'Ask the AI Tutor 200 questions' },
+
+  // ── VISTA Elite ──────────────────────────────────────────────────────────
+  { id: 'vista-initiate',      category: 'vista', emoji: '👁️', name: 'VISTA Initiate',      description: 'Complete a lesson + submit a project',                     xpBonus: 250  },
+  { id: 'precision-learner',   category: 'vista', emoji: '🎯', name: 'Precision Learner',   description: '95%+ gate accuracy + 80%+ flashcard retention',            xpBonus: 250  },
+  { id: 'content-creator',     category: 'vista', emoji: '✨', name: 'Content Creator',     description: 'Write 3000+ words and score 80+ on a quality check',      xpBonus: 250  },
+  { id: 'full-stack-learner',  category: 'vista', emoji: '🔗', name: 'Full-Stack Learner',  description: 'Complete any technology + score 70+ on a project review',  xpBonus: 250  },
+  { id: 'the-grinder',         category: 'vista', emoji: '💪', name: 'The Grinder',         description: '200+ study hours + 3+ projects submitted',                 xpBonus: 500  },
+  { id: 'all-rounder',         category: 'vista', emoji: '🌟', name: 'All-Rounder',         description: '3+ technologies + 1000 note words + 3+ projects',          xpBonus: 500  },
+  { id: 'the-vista',           category: 'vista', emoji: '👁️', name: 'THE VISTA',           description: '5 techs complete + gold project + 500 flashcards + 2000 note words', xpBonus: 1000 },
 ];
 
+// GET /api/achievements — list all badges with unlock status
 router.get('/', auth, async (req, res) => {
   try {
     const unlocked = await Achievement.find({ userId: req.user.userId });
-    const unlockedIds = unlocked.map(a => a.badgeId);
+    const unlockedMap = new Map(unlocked.map(a => [a.badgeId, a.unlockedAt]));
     const badges = ALL_BADGES.map(b => ({
       ...b,
-      unlocked: unlockedIds.includes(b.id),
-      unlockedAt: unlocked.find(a => a.badgeId === b.id)?.unlockedAt || null,
+      unlocked: unlockedMap.has(b.id),
+      unlockedAt: unlockedMap.get(b.id) || null,
     }));
     res.json(badges);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
+// POST /api/achievements/check — evaluate all conditions, award new badges
 router.post('/check', auth, async (req, res) => {
   try {
     const userId = req.user.userId;
     const existing = await Achievement.find({ userId });
     const existingIds = new Set(existing.map(a => a.badgeId));
 
-    const [user, sessions, progress, flashcardProg, scheduleWeeks, notes, mlAnalyses, chatHistory, snippets] = await Promise.all([
+    const [user, sessions, progress, flashcardProg, notes, chatHistory, snippets, projects] = await Promise.all([
       User.findById(userId),
       TypingSession.find({ userId }),
       Progress.findOne({ userId }),
       FlashcardProgress.find({ userId }),
-      ScheduleWeek.find({ userId }),
       Note.find({ userId }),
-      MlAnalysis.find({ userId }),
       ChatHistory.findOne({ userId }),
       CodeSnippet.find({ userId }),
+      ProjectSubmission.find({ userId }),
     ]);
 
-    const gateSessions = sessions.filter(s => s.isGate && !s.wasSkipped);
-    const allSessions = sessions.filter(s => !s.wasSkipped);
-    const bestWpm = allSessions.length > 0 ? Math.max(...allSessions.map(s => s.wpm || 0)) : 0;
-    const totalReviewed = flashcardProg.reduce((sum, fp) => sum + fp.timesReviewed, 0);
-    const completedWeeks = scheduleWeeks.filter(w => w.completed).length;
-    const totalWords = notes.reduce((sum, n) => sum + (n.wordCount || 0), 0);
-    const totalHours = (user.totalStudySeconds || 0) / 3600;
-    const tutorQuestions = chatHistory ? chatHistory.messages.filter(m => m.role === 'user').length : 0;
-
-    const techProgress = progress?.techProgress || new Map();
-    const techsStarted = [...techProgress.values()].filter(t => t.status !== 'not-started').length;
-    const techsComplete = [...techProgress.values()].filter(t => t.status === 'complete').length;
-    const anyTechComplete = techsComplete > 0;
-
-    const projectProgress = progress?.projectProgress || new Map();
-    const projectsStarted = [...projectProgress.values()].filter(p => p.status !== 'not-started').length;
-    const projectsComplete = [...projectProgress.values()].filter(p => p.status === 'complete').length;
-
-    const levelProgress = progress?.levelProgress || new Map();
-    const levelsComplete = [...levelProgress.entries()].filter(([_, v]) => v).length;
+    // --- Derive metrics ---
+    const gateSessions       = sessions.filter(s => s.isGate && !s.wasSkipped);
+    const totalFlashcards    = flashcardProg.reduce((s, fp) => s + (fp.timesReviewed || 0), 0);
+    const totalNoteWords     = notes.reduce((s, n) => s + (n.wordCount || 0), 0);
+    const totalHours         = (user?.totalStudySeconds || 0) / 3600;
+    const tutorQuestions     = chatHistory ? chatHistory.messages.filter(m => m.role === 'user').length : 0;
+    const lessonSections     = [...(progress?.lessonProgress?.values?.() || [])].filter(Boolean).length;
+    const techProgress       = progress?.techProgress || new Map();
+    const techsStarted       = [...techProgress.values()].filter(t => t.status !== 'not-started').length;
+    const techsComplete      = [...techProgress.values()].filter(t => t.status === 'complete').length;
+    const snippetLanguages   = new Set(snippets.map(s => s.language).filter(Boolean));
+    const bestGateAccuracy   = gateSessions.length ? Math.max(...gateSessions.map(s => s.accuracy || 0)) : 0;
+    const totalReviewed      = flashcardProg.reduce((s, fp) => s + (fp.timesReviewed || 0), 0);
+    const totalCorrect       = flashcardProg.reduce((s, fp) => s + (fp.timesCorrect || 0), 0);
+    const flashcardRetention = totalReviewed > 0 ? totalCorrect / totalReviewed : 0;
+    const streak             = user?.streak?.count || 0;
+    const bestStreak         = Math.max(streak, user?.streak?.bestEver || 0);
 
     const checks = {
-      'first-keystrokes': gateSessions.length > 0,
-      'home-row-hero': levelProgress.get('L1') && allSessions.some(s => s.lessonId?.startsWith('L1') && s.accuracy >= 90),
-      'full-alphabet': !!levelProgress.get('L5'),
-      'symbol-master': !!levelProgress.get('L7'),
-      'code-typist': levelProgress.get('L8') && bestWpm >= 50,
-      'speed-30': bestWpm >= 30,
-      'speed-50': bestWpm >= 50,
-      'speed-70': bestWpm >= 70,
-      'speed-100': bestWpm >= 100,
-      'consistent': (() => {
-        const recent = allSessions.slice(0, 7);
-        return recent.length >= 7 && recent.every(s => s.accuracy >= 90);
-      })(),
-      'data-scientist': mlAnalyses.length >= 10,
-      'gate-keeper': gateSessions.length >= 30,
-      'marathon-typist': allSessions.length >= 50,
-      'night-owl': gateSessions.some(s => {
-        const hour = new Date(s.createdAt).getHours();
-        return hour >= 23;
-      }),
-      'early-bird': gateSessions.some(s => {
-        const hour = new Date(s.createdAt).getHours();
-        return hour < 7;
-      }),
-      'first-lesson': completedWeeks > 0,
-      'tech-explorer': techsStarted >= 3,
-      'deep-diver': anyTechComplete,
-      'flashcard-rookie': totalReviewed >= 50,
-      'flashcard-master': totalReviewed >= 500,
-      'code-runner': snippets.length >= 25,
-      'note-taker': totalWords >= 1000,
-      'project-starter': projectsStarted > 0,
-      'project-finisher': projectsComplete > 0,
-      'halfway-there': projectsComplete >= 5,
-      'builder': projectsComplete >= 10,
-      'curious-mind': tutorQuestions >= 50,
-      'scholar': totalHours >= 100,
-      'roadmap-50': techsComplete >= 5,
-      'the-long-game': techsComplete >= 10,
-      'dual-threat': gateSessions.length >= 7 && completedWeeks >= 7,
-      'codec-initiate': bestWpm >= 30 && projectsComplete >= 1,
-      'precision-coder': allSessions.some(s => s.accuracy >= 95) && flashcardProg.some(fp => fp.timesReviewed > 0 && (fp.timesCorrect / fp.timesReviewed) >= 0.9),
-      'mind-and-fingers': !!levelProgress.get('L5') && techProgress.get('python')?.status === 'complete',
-      'developer-dna': bestWpm >= 50 && projectsComplete >= 3,
-      'npc-awakened': levelsComplete >= 8 && techsComplete >= 5,
-      'machine-learning-badge': mlAnalyses.length >= 20 && techProgress.get('pytorch')?.status === 'complete',
-      'grinder': allSessions.length >= 100 && totalHours >= 200,
-      'all-rounder': bestWpm >= 70 && techsStarted >= 10,
-      'the-codec': bestWpm >= 80 && levelsComplete >= 8 && techsComplete >= 10 && projectsComplete >= 10,
+      // Learner
+      'first-lesson':      lessonSections >= 1,
+      'lesson-veteran':    lessonSections >= 25,
+      'tech-explorer':     techsStarted >= 3,
+      'deep-diver':        techsComplete >= 1,
+      'roadmap-half':      techsComplete >= 5,
+      'flashcard-rookie':  totalFlashcards >= 50,
+      'flashcard-master':  totalFlashcards >= 500,
+      'note-taker':        totalNoteWords >= 500,
+      'note-author':       notes.some(n => (n.qualityScore || 0) >= 70),
+      'deep-notes':        totalNoteWords >= 2000,
+      'scholar':           totalHours >= 100,
+      'century-club':      techsComplete >= 10,
+
+      // Builder
+      'first-submission':  projects.length >= 1,
+      'project-bronze':    projects.some(p => !p.reviewFailed && (p.score || 0) >= 50),
+      'project-silver':    projects.some(p => !p.reviewFailed && (p.score || 0) >= 70),
+      'project-gold':      projects.some(p => !p.reviewFailed && (p.score || 0) >= 85),
+      'multi-builder':     projects.length >= 3,
+      'code-curious':      snippets.length >= 5,
+      'polyglot':          snippetLanguages.size >= 5,
+      'snippet-saver':     snippets.length >= 10,
+
+      // Grind
+      'gate-first':        gateSessions.length >= 1,
+      'gate-keeper':       gateSessions.length >= 30,
+      'streak-3':          bestStreak >= 3,
+      'streak-7':          bestStreak >= 7,
+      'streak-30':         bestStreak >= 30,
+      'early-bird':        gateSessions.some(s => new Date(s.createdAt).getHours() < 7),
+      'night-owl':         gateSessions.some(s => new Date(s.createdAt).getHours() >= 23),
+      'time-lord':         totalHours >= 200,
+
+      // Explorer
+      'first-question':    tutorQuestions >= 1,
+      'curious-mind':      tutorQuestions >= 50,
+      'knowledge-seeker':  tutorQuestions >= 200,
+
+      // VISTA Elite
+      'vista-initiate':     lessonSections >= 1 && projects.length >= 1,
+      'precision-learner':  bestGateAccuracy >= 95 && flashcardRetention >= 0.8 && totalReviewed >= 10,
+      'content-creator':    totalNoteWords >= 3000 && notes.some(n => (n.qualityScore || 0) >= 80),
+      'full-stack-learner': techsComplete >= 1 && projects.some(p => !p.reviewFailed && (p.score || 0) >= 70),
+      'the-grinder':        totalHours >= 200 && projects.length >= 3,
+      'all-rounder':        techsStarted >= 3 && totalNoteWords >= 1000 && projects.length >= 3,
+      'the-vista':          techsComplete >= 5 && projects.some(p => !p.reviewFailed && (p.score || 0) >= 85) && totalFlashcards >= 500 && totalNoteWords >= 2000,
     };
 
-    const newBadges = [];
+    const newBadgeIds = [];
+    let xpGained = 0;
     for (const [badgeId, condition] of Object.entries(checks)) {
       if (condition && !existingIds.has(badgeId)) {
         await Achievement.create({ userId, badgeId });
-        newBadges.push(badgeId);
+        newBadgeIds.push(badgeId);
         const badge = ALL_BADGES.find(b => b.id === badgeId);
-        if (badge?.xpBonus) {
-          user.xp += badge.xpBonus;
-        }
+        if (badge?.xpBonus) xpGained += badge.xpBonus;
       }
     }
 
-    if (newBadges.length > 0) {
+    if (xpGained > 0 && user) {
+      user.xp = (user.xp || 0) + xpGained;
       await user.save();
     }
 
+    const allUnlocked = await Achievement.find({ userId });
+    const unlockedMap = new Map(allUnlocked.map(a => [a.badgeId, a.unlockedAt]));
     const allBadges = ALL_BADGES.map(b => ({
       ...b,
-      unlocked: existingIds.has(b.id) || newBadges.includes(b.id),
+      unlocked: unlockedMap.has(b.id),
+      unlockedAt: unlockedMap.get(b.id) || null,
     }));
 
-    res.json({ newBadges, allBadges });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.json({ newBadges: newBadgeIds, allBadges });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 

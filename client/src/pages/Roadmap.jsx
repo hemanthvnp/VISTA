@@ -11,9 +11,9 @@ import { TECHNOLOGIES } from '../utils/typingGeminiPrompt';
 import { Map, Filter } from 'lucide-react';
 
 const LAYERS = [
-  { id: 1, name: 'Game Dev', color: 'cyan', techs: TECHNOLOGIES.filter(t => t.layer === 1) },
-  { id: 2, name: 'AI Brain', color: 'purple', techs: TECHNOLOGIES.filter(t => t.layer === 2) },
-  { id: 3, name: 'Federation', color: 'gold', techs: TECHNOLOGIES.filter(t => t.layer === 3) },
+  { id: 1, name: 'Foundations', color: 'cyan',   techs: TECHNOLOGIES.filter(t => t.layer === 1) },
+  { id: 2, name: 'Web Stack',   color: 'purple', techs: TECHNOLOGIES.filter(t => t.layer === 2) },
+  { id: 3, name: 'Advanced CS', color: 'gold',   techs: TECHNOLOGIES.filter(t => t.layer === 3) },
 ];
 
 export default function Roadmap() {

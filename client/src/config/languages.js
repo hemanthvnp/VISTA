@@ -19,7 +19,7 @@ export const LANGUAGES = [
     runner: 'browser',
     monaco: 'python',
     color: 'text-brutal-mint border-brutal-mint',
-    starter: '# Python playground\nprint("Hello from VANTA!")\n\nfor i in range(5):\n    print(f"Step {i + 1}")\n',
+    starter: '# Python playground\nprint("Hello from VISTA!")\n\nfor i in range(5):\n    print(f"Step {i + 1}")\n',
   },
   {
     id: 'javascript',
@@ -27,7 +27,7 @@ export const LANGUAGES = [
     runner: 'browser',
     monaco: 'javascript',
     color: 'text-brutal-yellow border-brutal-yellow',
-    starter: '// JavaScript playground\nconsole.log("Hello from VANTA!");\n\nfor (let i = 0; i < 5; i++) {\n  console.log("Step", i + 1);\n}\n',
+    starter: '// JavaScript playground\nconsole.log("Hello from VISTA!");\n\nfor (let i = 0; i < 5; i++) {\n  console.log("Step", i + 1);\n}\n',
   },
   {
     id: 'typescript',
@@ -35,7 +35,7 @@ export const LANGUAGES = [
     runner: 'browser',
     monaco: 'typescript',
     color: 'text-brutal-blue border-brutal-blue',
-    starter: '// TypeScript playground\nconst greet = (name: string): string => `Hello, ${name}!`;\nconsole.log(greet("VANTA"));\n\nfor (let i = 0; i < 5; i++) console.log("Step", i + 1);\n',
+    starter: '// TypeScript playground\nconst greet = (name: string): string => `Hello, ${name}!`;\nconsole.log(greet("VISTA"));\n\nfor (let i = 0; i < 5; i++) console.log("Step", i + 1);\n',
   },
   {
     id: 'cpp',
@@ -44,7 +44,7 @@ export const LANGUAGES = [
     piston: { language: 'c++', filename: 'main.cpp' },
     monaco: 'cpp',
     color: 'text-brutal-blue border-brutal-blue',
-    starter: '#include <iostream>\n#include <vector>\n\nint main() {\n    std::cout << "Hello from VANTA!" << std::endl;\n    std::vector<int> v = {1, 2, 3, 4, 5};\n    for (int x : v) std::cout << x << " ";\n    std::cout << std::endl;\n    return 0;\n}\n',
+    starter: '#include <iostream>\n#include <vector>\n\nint main() {\n    std::cout << "Hello from VISTA!" << std::endl;\n    std::vector<int> v = {1, 2, 3, 4, 5};\n    for (int x : v) std::cout << x << " ";\n    std::cout << std::endl;\n    return 0;\n}\n',
   },
   {
     id: 'c',
@@ -53,7 +53,7 @@ export const LANGUAGES = [
     piston: { language: 'c', filename: 'main.c' },
     monaco: 'c',
     color: 'text-brutal-mint border-brutal-mint',
-    starter: '#include <stdio.h>\n\nint main(void) {\n    printf("Hello from VANTA!\\n");\n    for (int i = 0; i < 5; i++) printf("Step %d\\n", i + 1);\n    return 0;\n}\n',
+    starter: '#include <stdio.h>\n\nint main(void) {\n    printf("Hello from VISTA!\\n");\n    for (int i = 0; i < 5; i++) printf("Step %d\\n", i + 1);\n    return 0;\n}\n',
   },
   {
     id: 'java',
@@ -62,7 +62,7 @@ export const LANGUAGES = [
     piston: { language: 'java', filename: 'Main.java' },
     monaco: 'java',
     color: 'text-brutal-orange border-brutal-orange',
-    starter: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello from VANTA!");\n        for (int i = 0; i < 5; i++) System.out.println("Step " + (i + 1));\n    }\n}\n',
+    starter: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello from VISTA!");\n        for (int i = 0; i < 5; i++) System.out.println("Step " + (i + 1));\n    }\n}\n',
   },
   {
     id: 'kotlin',
@@ -71,7 +71,7 @@ export const LANGUAGES = [
     piston: { language: 'kotlin', filename: 'main.kt' },
     monaco: 'kotlin',
     color: 'text-brutal-purple border-brutal-purple',
-    starter: 'fun main() {\n    println("Hello from VANTA!")\n    for (i in 1..5) println("Step $i")\n}\n',
+    starter: 'fun main() {\n    println("Hello from VISTA!")\n    for (i in 1..5) println("Step $i")\n}\n',
   },
   {
     id: 'go',
@@ -80,7 +80,7 @@ export const LANGUAGES = [
     piston: { language: 'go', filename: 'main.go' },
     monaco: 'go',
     color: 'text-brutal-blue border-brutal-blue',
-    starter: 'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello from VANTA!")\n    for i := 1; i <= 5; i++ {\n        fmt.Println("Step", i)\n    }\n}\n',
+    starter: 'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello from VISTA!")\n    for i := 1; i <= 5; i++ {\n        fmt.Println("Step", i)\n    }\n}\n',
   },
   {
     id: 'rust',
@@ -89,7 +89,7 @@ export const LANGUAGES = [
     piston: { language: 'rust', filename: 'main.rs' },
     monaco: 'rust',
     color: 'text-brutal-orange border-brutal-orange',
-    starter: 'fn main() {\n    println!("Hello from VANTA!");\n    for i in 1..=5 {\n        println!("Step {}", i);\n    }\n}\n',
+    starter: 'fn main() {\n    println!("Hello from VISTA!");\n    for i in 1..=5 {\n        println!("Step {}", i);\n    }\n}\n',
   },
   {
     id: 'csharp',
@@ -98,7 +98,7 @@ export const LANGUAGES = [
     piston: { language: 'csharp', filename: 'Program.cs' },
     monaco: 'csharp',
     color: 'text-brutal-purple border-brutal-purple',
-    starter: 'using System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello from VANTA!");\n        for (int i = 1; i <= 5; i++) Console.WriteLine($"Step {i}");\n    }\n}\n',
+    starter: 'using System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello from VISTA!");\n        for (int i = 1; i <= 5; i++) Console.WriteLine($"Step {i}");\n    }\n}\n',
   },
   {
     id: 'php',
@@ -107,7 +107,7 @@ export const LANGUAGES = [
     piston: { language: 'php', filename: 'main.php' },
     monaco: 'php',
     color: 'text-brutal-purple border-brutal-purple',
-    starter: '<?php\necho "Hello from VANTA!\\n";\nfor ($i = 1; $i <= 5; $i++) echo "Step $i\\n";\n',
+    starter: '<?php\necho "Hello from VISTA!\\n";\nfor ($i = 1; $i <= 5; $i++) echo "Step $i\\n";\n',
   },
   {
     id: 'ruby',
@@ -116,7 +116,7 @@ export const LANGUAGES = [
     piston: { language: 'ruby', filename: 'main.rb' },
     monaco: 'ruby',
     color: 'text-brutal-red border-brutal-red',
-    starter: 'puts "Hello from VANTA!"\n(1..5).each { |i| puts "Step #{i}" }\n',
+    starter: 'puts "Hello from VISTA!"\n(1..5).each { |i| puts "Step #{i}" }\n',
   },
   {
     id: 'swift',
@@ -125,7 +125,7 @@ export const LANGUAGES = [
     piston: { language: 'swift', filename: 'main.swift' },
     monaco: 'swift',
     color: 'text-brutal-orange border-brutal-orange',
-    starter: 'print("Hello from VANTA!")\nfor i in 1...5 {\n    print("Step \\(i)")\n}\n',
+    starter: 'print("Hello from VISTA!")\nfor i in 1...5 {\n    print("Step \\(i)")\n}\n',
   },
   {
     id: 'dart',
@@ -134,7 +134,7 @@ export const LANGUAGES = [
     piston: { language: 'dart', filename: 'main.dart' },
     monaco: 'dart',
     color: 'text-brutal-blue border-brutal-blue',
-    starter: 'void main() {\n  print("Hello from VANTA!");\n  for (var i = 1; i <= 5; i++) {\n    print("Step $i");\n  }\n}\n',
+    starter: 'void main() {\n  print("Hello from VISTA!");\n  for (var i = 1; i <= 5; i++) {\n    print("Step $i");\n  }\n}\n',
   },
   {
     id: 'bash',
@@ -143,7 +143,7 @@ export const LANGUAGES = [
     piston: { language: 'bash', filename: 'main.sh' },
     monaco: 'shell',
     color: 'text-brutal-mint border-brutal-mint',
-    starter: '#!/usr/bin/env bash\necho "Hello from VANTA!"\nfor i in 1 2 3 4 5; do\n  echo "Step $i"\ndone\n',
+    starter: '#!/usr/bin/env bash\necho "Hello from VISTA!"\nfor i in 1 2 3 4 5; do\n  echo "Step $i"\ndone\n',
   },
 ];
 

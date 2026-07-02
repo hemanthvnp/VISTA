@@ -28,7 +28,7 @@ const int    MAX = 100;       // immutable
 
 ## auto Keyword (C++11)
 \`\`\`cpp
-auto name = "Shane";   // const char*
+auto name = "Hemanth";   // const char*
 auto score = 95;       // int
 auto pi = 3.14159;     // double
 \`\`\`` },
@@ -41,7 +41,7 @@ int main() {
     int age = 22;
     double height = 1.82;
     bool isCoder = true;
-    std::string name = "Shane";
+    std::string name = "Hemanth";
 
     std::cout << "Name: " << name << std::endl;
     std::cout << "Age: " << age << std::endl;
@@ -350,7 +350,7 @@ public:
 };
 
 int main() {
-    Character hero("Shane", 100);
+    Character hero("Hemanth", 100);
     Character boss("Dragon", 200);
 
     hero.print();

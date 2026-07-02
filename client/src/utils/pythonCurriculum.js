@@ -37,7 +37,7 @@ name = age = "same"
                 type: 'code',
                 title: 'Variables in Action',
                 code: `# Variables & type inspection
-name = "Shane"
+name = "Hemanth"
 age = 22
 height = 1.82
 is_coder = True
@@ -59,8 +59,8 @@ print(f"Sum: {x + y + z}")`,
 - \`level\` = 1 (integer)  
 - \`power\` = 9000.1 (float)
 
-Then print: **"Player: Shane | Level: 1 | Power: 9000.1"**
-(replace Shane with your username)`,
+Then print: **"Player: Hemanth | Level: 1 | Power: 9000.1"**
+(replace Hemanth with your username)`,
                 starterCode: `# Define your variables here
 username = 
 level = 
@@ -116,7 +116,7 @@ s[::-1] # 'nohtyP' (reversed)
 
 ## f-Strings (Python 3.6+)
 \`\`\`python
-name = "Shane"
+name = "Hemanth"
 score = 9000
 print(f"{name} scored {score:,} points!")
 \`\`\``,
@@ -286,7 +286,7 @@ print(f"Unique: {unique}")`,
 ## Dictionary Basics
 \`\`\`python
 user = {
-    "name": "Shane",
+    "name": "Hemanth",
     "xp": 1500,
     "active": True,
 }
@@ -501,7 +501,7 @@ def profile(**kwargs):
     for k, v in kwargs.items():
         print(f"{k}: {v}")
 
-profile(name="Shane", xp=1500)
+profile(name="Hemanth", xp=1500)
 \`\`\`
 
 ## Lambda Functions
@@ -526,7 +526,7 @@ def add(a: int, b: int) -> int:
 def create_player(name, hp=100, level=1):
     return {"name": name, "hp": hp, "level": level}
 
-p1 = create_player("Shane")
+p1 = create_player("Hemanth")
 p2 = create_player("Alice", hp=150, level=5)
 print(p1)
 print(p2)
@@ -663,7 +663,7 @@ class Warrior(Character):
     def __init__(self, name):
         super().__init__(name, hp=150, attack=25)
 
-hero = Warrior("Shane")
+hero = Warrior("Hemanth")
 boss = Mage("Dragon")
 
 print("=== BATTLE ===")
@@ -886,7 +886,7 @@ with open("log.txt", "a") as f:      # append
 import json
 
 # Python dict → JSON string
-data = {"name": "Shane", "xp": 1500}
+data = {"name": "Hemanth", "xp": 1500}
 json_str = json.dumps(data, indent=2)
 
 # JSON string → Python dict
@@ -907,7 +907,7 @@ with open("user.json") as f:
 
 # Simulate a game save system
 save_data = {
-    "player": "Shane",
+    "player": "Hemanth",
     "level": 5,
     "xp": 2750,
     "inventory": ["sword", "shield", "potion"],

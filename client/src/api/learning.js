@@ -73,37 +73,6 @@ export const checkNoteQuality = async (techId) => {
   return handleResponse(res);
 };
 
-export const publishNoteToMedium = async (techId) => {
-  const res = await fetch(`/api/learning/notes/${techId}/publish`, {
-    method: 'POST',
-    headers: getHeaders(),
-  });
-  return handleResponse(res);
-};
-
-// Medium connection
-export const connectMedium = async (token) => {
-  const res = await fetch('/api/medium/connect', {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify({ token }),
-  });
-  return handleResponse(res);
-};
-
-export const getMediumStatus = async () => {
-  const res = await fetch('/api/medium/status', { headers: getHeaders() });
-  return handleResponse(res);
-};
-
-export const disconnectMedium = async () => {
-  const res = await fetch('/api/medium/disconnect', {
-    method: 'DELETE',
-    headers: getHeaders(),
-  });
-  return handleResponse(res);
-};
-
 // Snippets
 export const getSnippets = async () => {
   const res = await fetch('/api/snippets', { headers: getHeaders() });

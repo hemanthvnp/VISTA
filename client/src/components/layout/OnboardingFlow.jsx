@@ -1,21 +1,21 @@
 /** @fileoverview First-time user onboarding - 3-step setup survey */
 import { useState } from 'react';
-import { Zap } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import useAppStore from '../../store/useAppStore';
 import { updateProfile } from '../../api/auth';
 
 const TECHS = [
-  { id: 'python', name: 'Python', emoji: '\u{1F40D}' },
-  { id: 'cpp', name: 'C++', emoji: '\u{2699}\u{FE0F}' },
-  { id: 'ue5', name: 'Unreal Engine 5', emoji: '\u{1F3AE}' },
-  { id: 'blender', name: 'Blender', emoji: '\u{1F3A8}' },
-  { id: 'git', name: 'Git', emoji: '\u{1F4C2}' },
-  { id: 'pytorch', name: 'PyTorch', emoji: '\u{1F525}' },
-  { id: 'rl-ppo', name: 'RL / PPO', emoji: '\u{1F916}' },
-  { id: 'zeromq', name: 'ZeroMQ', emoji: '\u{1F4E1}' },
-  { id: 'fastapi', name: 'FastAPI', emoji: '\u{1F680}' },
-  { id: 'federated-learning', name: 'Federated Learning', emoji: '\u{1F310}' },
+  { id: 'python',     name: 'Python',      emoji: '🐍' },
+  { id: 'javascript', name: 'JavaScript',  emoji: '🌐' },
+  { id: 'git',        name: 'Git',         emoji: '📂' },
+  { id: 'sql',        name: 'SQL',         emoji: '🗄️' },
+  { id: 'cpp',        name: 'C++',         emoji: '⚙️' },
+  { id: 'typescript', name: 'TypeScript',  emoji: '📘' },
+  { id: 'react',      name: 'React',       emoji: '⚛️' },
+  { id: 'nodejs',     name: 'Node.js',     emoji: '🟢' },
+  { id: 'java',       name: 'Java',        emoji: '☕' },
+  { id: 'dsa',        name: 'Data Structures', emoji: '🧩' },
 ];
 
 export default function OnboardingFlow({ onComplete }) {
@@ -49,7 +49,7 @@ export default function OnboardingFlow({ onComplete }) {
       <div className="max-w-lg w-full mx-4">
         {/* Header */}
         <div className="text-center mb-8">
-          <Zap className="w-12 h-12 text-brutal-mint mx-auto mb-3" />
+          <Eye className="w-12 h-12 text-brutal-purple mx-auto mb-3" />
           <h1 className="text-2xl font-heading font-bold text-text-primary">Welcome, Trainee NPC</h1>
           <p className="text-text-secondary mt-1">Let's set you up.</p>
         </div>

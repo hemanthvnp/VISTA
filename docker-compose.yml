@@ -1,0 +1,21 @@
+services:
+  piston:
+    image: ghcr.io/engineer-man/piston
+    container_name: piston
+    restart: unless-stopped
+    ports:
+      - "2000:2000"
+    volumes:
+      - piston_packages:/piston/packages
+    privileged: true
+    tmpfs:
+      - /tmp
+    environment:
+      # Kotlin/Java JVM compilation is slow — raise compile limits globally
+      PISTON_COMPILE_TIMEOUT: 60000       # 60s wall time for compile
+      PISTON_COMPILE_CPU_TIME: 60000      # 60s CPU time for compile
+      PISTON_RUN_TIMEOUT: 10000           # 10s wall time for run
+      PISTON_RUN_CPU_TIME: 10000          # 10s CPU time for run
+
+volumes:
+  piston_packages:
