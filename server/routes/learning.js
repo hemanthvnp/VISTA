@@ -3,7 +3,7 @@ const FlashcardProgress = require('../models/FlashcardProgress');
 const ScheduleWeek = require('../models/ScheduleWeek');
 const Note = require('../models/Note');
 const auth = require('../middleware/auth');
-const { generateFlashcards } = require('../services/gemini');
+const { generateFlashcards, generateSchedule } = require('../services/gemini');
 const { trackActivity } = require('../utils/activityTracker');
 const CoachingService = require('../services/CoachingService');
 const UserModelService = require('../services/UserModelService');
@@ -109,6 +109,72 @@ router.post('/schedule', auth, async (req, res) => {
       ...req.body,
     });
     res.status(201).json(week);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// AI-optimized schedule generation from a short intake questionnaire.
+// If `replace` is true, the user's existing weeks are cleared first.
+router.post('/schedule/generate', auth, async (req, res) => {
+  try {
+    const {
+      techIds = [],
+      skillLevel = 'beginner',
+      goal = '',
+      weeks = 8,
+      hoursPerWeek = 5,
+      focus = '',
+      replace = true,
+    } = req.body;
+
+    if (!Array.isArray(techIds) || techIds.length === 0) {
+      return res.status(400).json({ message: 'Select at least one technology' });
+    }
+    const weekCount = Math.min(Math.max(parseInt(weeks, 10) || 8, 1), 26);
+
+    let plan;
+    try {
+      plan = await generateSchedule({
+        techIds,
+        skillLevel,
+        goal,
+        weeks: weekCount,
+        hoursPerWeek,
+        focus,
+      });
+    } catch (aiError) {
+      console.error('[Schedule generate AI error]', aiError?.message || aiError);
+      return res.status(502).json({ message: 'AI schedule generation failed: ' + (aiError?.message || String(aiError)) });
+    }
+
+    const rawWeeks = Array.isArray(plan?.weeks) ? plan.weeks : [];
+    if (rawWeeks.length === 0) {
+      return res.status(502).json({ message: 'AI returned an empty plan; please try again' });
+    }
+
+    // Sanitize the model output; only trust known techIds, coerce numbers.
+    const cleaned = rawWeeks
+      .map((w, i) => ({
+        userId: req.user.userId,
+        weekNumber: Number.isFinite(w.weekNumber) ? w.weekNumber : i + 1,
+        techId: techIds.includes(w.techId) ? w.techId : techIds[0],
+        topic: String(w.topic || 'Study topic').slice(0, 120),
+        task: String(w.task || '').slice(0, 400),
+        targetHours: Math.min(Math.max(parseInt(w.targetHours, 10) || hoursPerWeek, 1), 40),
+      }))
+      .sort((a, b) => a.weekNumber - b.weekNumber)
+      .map((w, i) => ({ ...w, weekNumber: i + 1 }));
+
+    if (replace) {
+      await ScheduleWeek.deleteMany({ userId: req.user.userId });
+    } else {
+      const existing = await ScheduleWeek.countDocuments({ userId: req.user.userId });
+      cleaned.forEach((w, i) => { w.weekNumber = existing + i + 1; });
+    }
+
+    const created = await ScheduleWeek.insertMany(cleaned);
+    res.status(201).json({ weeks: created });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

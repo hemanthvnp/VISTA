@@ -140,4 +140,70 @@ Rules:
   return JSON.parse(stripJsonFences(text));
 };
 
-module.exports = { getTypingAdvice, chatWithTutor, reviewPythonCode, generateFlashcards };
+/**
+ * Generate an optimized week-by-week learning schedule from a short intake.
+ * Feature key: "schedule"
+ *
+ * @param {Object} answers
+ * @param {string[]} answers.techIds       Valid technology ids to focus on
+ * @param {string} answers.skillLevel      'beginner' | 'intermediate' | 'advanced'
+ * @param {string} answers.goal            Free-text goal (what they want to achieve)
+ * @param {number} answers.weeks           How many weeks the plan should span
+ * @param {number} answers.hoursPerWeek    Weekly time budget in hours
+ * @param {string} [answers.focus]         Optional extra focus areas / constraints
+ * @returns {Promise<{ weeks: Array }>}
+ */
+const generateSchedule = async (answers, opts = {}) => {
+  const {
+    techIds = [],
+    skillLevel = 'beginner',
+    goal = '',
+    weeks = 8,
+    hoursPerWeek = 5,
+    focus = '',
+  } = answers;
+
+  const prompt = `You are an expert programming curriculum designer for a developer learning app called V.
+Build an optimized, progressive week-by-week study plan.
+
+Learner profile:
+- Technologies to focus on (use ONLY these ids for techId): ${JSON.stringify(techIds)}
+- Current skill level: ${skillLevel}
+- Goal: ${goal || 'become proficient'}
+- Plan length: ${weeks} weeks
+- Weekly time budget: ${hoursPerWeek} hours
+
+Extra focus / constraints: ${focus || 'none'}
+
+Return ONLY valid JSON, no markdown, no commentary. Exactly this structure:
+{
+  "weeks": [
+    {
+      "weekNumber": 1,
+      "techId": "one of the provided ids",
+      "topic": "short topic title (max 6 words)",
+      "task": "one concrete, actionable task for the week (max 25 words)",
+      "targetHours": ${hoursPerWeek}
+    }
+  ]
+}
+
+Rules:
+- Produce exactly ${weeks} week objects, weekNumber from 1 to ${weeks} in order.
+- Order topics so difficulty ramps up progressively (fundamentals first).
+- Each week's techId MUST be one of: ${JSON.stringify(techIds)}.
+- Distribute weeks sensibly across the chosen technologies.
+- Keep targetHours close to ${hoursPerWeek} (adjust +/-2 only if a week is heavier).
+- Tasks must be specific and buildable (e.g. "Build a CLI todo app applying X"), not vague ("learn X").`;
+
+  const { text } = await generate({
+    feature: 'schedule',
+    prompt,
+    providerOverride: opts.providerOverride,
+    temperature: 0.7,
+    maxTokens: 3072,
+  });
+  return JSON.parse(stripJsonFences(text));
+};
+
+module.exports = { getTypingAdvice, chatWithTutor, reviewPythonCode, generateFlashcards, generateSchedule };

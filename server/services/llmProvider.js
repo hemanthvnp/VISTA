@@ -30,6 +30,7 @@ const FEATURE_ENV_KEYS = {
   flashcards: 'LLM_PROVIDER_FLASHCARDS',
   codeReview: 'LLM_PROVIDER_CODE_REVIEW',
   noteQuality: 'LLM_PROVIDER_NOTE_QUALITY',
+  schedule: 'LLM_PROVIDER_SCHEDULE',
 };
 
 function resolveProvider(feature) {

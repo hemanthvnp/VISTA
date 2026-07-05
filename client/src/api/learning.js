@@ -33,6 +33,16 @@ export const createWeek = async (data) => {
   return handleResponse(res);
 };
 
+// AI-generated schedule from intake answers
+export const generateSchedule = async (answers) => {
+  const res = await fetch('/api/learning/schedule/generate', {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(answers),
+  });
+  return handleResponse(res);
+};
+
 export const updateWeek = async (id, data) => {
   const res = await fetch(`/api/learning/schedule/${id}`, {
     method: 'PUT',
